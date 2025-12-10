@@ -21,6 +21,9 @@ public class DestinationRequest {
 
     private String description;
 
+    @NotBlank(message = "Country is required")
+    private String country;
+
     @NotBlank(message = "District is required")
     private String district;
 

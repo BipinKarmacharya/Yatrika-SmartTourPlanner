@@ -2,10 +2,12 @@ package com.yatrika.destination.dto.response;
 
 import com.yatrika.destination.domain.DestinationType;
 import com.yatrika.destination.domain.DifficultyLevel;
+import com.yatrika.review.dto.response.ReviewResponse;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class DestinationResponse {
@@ -36,4 +38,5 @@ public class DestinationResponse {
     private Boolean hasGuideServices;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<ReviewResponse> reviews;
 }

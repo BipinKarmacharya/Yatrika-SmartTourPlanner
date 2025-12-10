@@ -12,7 +12,7 @@ public class YatrikaApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(YatrikaApplication.class, args);
         System.out.println("YATRIKA Backend is running");
-        System.out.println("Swagger UI: http://localhost:8080/api/swagger-ui.html");
+        System.out.println("Swagger UI: http://localhost:8080/swagger-ui.html");
         System.out.println("API Base URL: http://localhost:8080/api");
 	}
 }

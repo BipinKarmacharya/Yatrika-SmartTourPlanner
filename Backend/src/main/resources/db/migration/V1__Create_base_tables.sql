@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS destinations (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(200) NOT NULL,
     description TEXT,
+    country VARCHAR(100) NOT NULL,
     district VARCHAR(100) NOT NULL,
     province VARCHAR(100) NOT NULL,
     latitude DECIMAL(10, 8),

@@ -4,7 +4,7 @@ spring:
 
   # Database Configuration
   datasource:
-    url: jdbc:postgresql://localhost:5432/yatrika_db
+    url: jdbc:postgresql://localhost:5432/yatrika
     username: postgres
     password: PostgreSQL@2000
     driver-class-name: org.postgresql.Driver
@@ -54,7 +54,7 @@ server:
     context-path: /
   compression:
     enabled: true
-    mini-types: text/html,text/xml,text/plain,text/css,text/javascript,application/json,application/javascript
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/json,application/javascript
 
 # Logging
 logging:

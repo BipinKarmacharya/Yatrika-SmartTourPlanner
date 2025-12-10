@@ -33,3 +33,7 @@
   CREATE TRIGGER update_user_preferences_updated_at
       BEFORE UPDATE ON user_preferences
       FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- New constraint required for V5's ON CONFLICT clause
+  ALTER TABLE destinations
+      ADD CONSTRAINT destinations_name_district_key UNIQUE (name, district);

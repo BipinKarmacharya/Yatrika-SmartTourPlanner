@@ -23,7 +23,7 @@ public class Destination extends BaseEntity {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Lob
+    @Column(columnDefinition = "text")
     private String description;
 
     @Column(length = 500)

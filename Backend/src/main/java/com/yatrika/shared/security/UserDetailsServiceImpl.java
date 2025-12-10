@@ -1,6 +1,5 @@
 package com.yatrika.shared.security;
 
-import com.yatrika.shared.security.UserPrincipal;
 import com.yatrika.user.domain.User;
 import com.yatrika.user.repository.UserRepository;
 import jakarta.transaction.Transactional;

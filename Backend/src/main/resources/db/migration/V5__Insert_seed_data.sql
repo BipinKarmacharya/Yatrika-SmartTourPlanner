@@ -1,23 +1,10 @@
----- src/main/resources/db/migration/V5__Insert_seed_data.sql
-
-  -- Insert sample admin user (password: Admin123)
-  INSERT INTO users (email, username, password_hash, first_name, last_name, role, is_email_verified)
-  VALUES (
-      'admin@yatrica.com',
-      'admin',
-      '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKv5UpSS', -- bcrypt hash of "Admin123"
-      'System',
-      'Admin',
-      'ADMIN',
-      true
-  ) ON CONFLICT (email) DO NOTHING;
-
-  -- Insert sample destinations in Nepal
-  INSERT INTO destinations (name, description, district, province, latitude, longitude, type, category, tags)
+-- Insert sample destinations in Nepal
+  INSERT INTO destinations (name, description, country, district, province, latitude, longitude, type, category, tags)
   VALUES
       (
           'Pashupatinath Temple',
           'One of the most sacred Hindu temples of Lord Shiva in the world, located on the banks of the Bagmati River.',
+          'Nepal',
           'Kathmandu',
           'Bagmati',
           27.7100,
@@ -29,6 +16,7 @@
       (
           'Boudhanath Stupa',
           'One of the largest spherical stupas in Nepal and a UNESCO World Heritage Site.',
+          'Nepal',
           'Kathmandu',
           'Bagmati',
           27.7214,
@@ -40,6 +28,7 @@
       (
           'Pokhara Lakeside',
           'Beautiful lakeside city with views of Annapurna mountain range and Phewa Lake.',
+          'Nepal',
           'Pokhara',
           'Gandaki',
           28.2096,
@@ -51,6 +40,7 @@
       (
           'Swayambhunath Stupa',
           'Ancient religious architecture atop a hill in the Kathmandu Valley, also known as Monkey Temple.',
+          'Nepal',
           'Kathmandu',
           'Bagmati',
           27.7149,
@@ -62,6 +52,7 @@
       (
           'Annapurna Base Camp',
           'One of the most popular trekking destinations in the world with stunning mountain views.',
+          'Nepal',
           'Kaski',
           'Gandaki',
           28.5271,

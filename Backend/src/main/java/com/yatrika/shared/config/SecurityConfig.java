@@ -59,13 +59,26 @@ public class SecurityConfig {
                         .requestMatchers("/api/bookmarks/**").hasRole("USER")         // Bookmarks
                         .requestMatchers("/api/profile/**").hasRole("USER")           // User profile
 
+                        // User review for destination
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.PUT, "/api/reviews/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/reviews/**/verify").hasRole("ADMIN")
+
+                        // Community posts endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/community/posts/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/community/posts/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.PUT, "/api/community/posts/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/community/posts/**").hasRole("USER")
+
                         // 🛡️ ADMIN-ONLY FEATURES
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")           // Admin dashboard
                         .requestMatchers("/api/analytics/**").hasRole("ADMIN")        // Analytics
                         .requestMatchers("/api/moderation/**").hasRole("ADMIN")       // Moderation
 
                         // 📚 DOCUMENTATION
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**").permitAll()
 
                         // 🔒 Everything else requires authentication
                         .anyRequest().authenticated()
