@@ -1,0 +1,39 @@
+server:
+  port: 443 # Usually behind a proxy, but configured for SSL/Prod
+
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 50 # Increased for higher load
+      minimum-idle: 10
+
+  jpa:
+    hibernate:
+      ddl-auto: validate # Strictly check schema, don't change it!
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  flyway:
+    enabled: true # Use migrations for schema changes in prod
+    baseline-on-migrate: true
+
+logging:
+  level:
+    com.yatrika: INFO
+    org.springframework.security: INFO
+    org.hibernate.SQL: ERROR
+
+app:
+  jwt:
+    secret: ${JWT_SECRET} # Injected from secure environment variable
+    expiration: 3600000 # Shorter expiration (1 hour) for better security
+  cors:
+    allowed-origins: "https://production-domain.com"
+    allow-credentials: true
+  upload:
+    dir: /var/www/yatrika/uploads

@@ -31,6 +31,7 @@ public class DestinationResponse {
     private Integer totalReviews;
     private Integer popularityScore;
     private String[] tags;
+    private Integer safetyLevel;
     private Boolean hasParking;
     private Boolean hasRestrooms;
     private Boolean hasDrinkingWater;
@@ -39,4 +40,14 @@ public class DestinationResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<ReviewResponse> reviews;
+    private List<DestinationImageResponse> images;
+
+    @Data
+    public static class DestinationImageResponse {
+        private Long id;
+        private String imageUrl;
+        private String caption;
+        private Boolean isPrimary;
+        private Integer displayOrder;
+    }
 }

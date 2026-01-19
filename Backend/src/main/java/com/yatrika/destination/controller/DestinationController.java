@@ -16,9 +16,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -101,6 +103,30 @@ public class DestinationController {
         DestinationResponse response = destinationService.createDestination(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @PostMapping(value = "/with-images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<DestinationResponse> createWithImages(
+            @RequestPart("destination") @Valid DestinationRequest request,
+            @RequestPart("files") MultipartFile[] files) {
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(destinationService.createWithImages(request, files));
+    }
+
+    @PostMapping("/bulk")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Bulk create destinations (Admin only)",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<?> bulkCreateDestinations(
+            @Valid @RequestBody List<DestinationRequest> requests) {
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(destinationService.bulkCreate(requests));
+    }
+
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")

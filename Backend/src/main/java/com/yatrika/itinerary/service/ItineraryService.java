@@ -14,6 +14,7 @@ import com.yatrika.destination.service.DestinationService;
 import com.yatrika.shared.exception.AppException;
 import com.yatrika.shared.exception.ResourceNotFoundException;
 import com.yatrika.shared.security.RolePermissionService;
+import com.yatrika.user.service.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,7 +32,7 @@ import java.time.temporal.ChronoUnit;
 public class ItineraryService {
 
     private final ItineraryRepository itineraryRepository;
-    private final AuthService userService;
+    private final CurrentUserService currentUserService;
     private final DestinationService destinationService;
     private final RolePermissionService rolePermissionService;
     private final ItineraryMapper itineraryMapper;
@@ -46,7 +47,7 @@ public class ItineraryService {
             throw new AppException("Only registered users can create itineraries. Please login or register.");
         }
 
-        User currentUser = userService.getCurrentUserEntity();
+        User currentUser = currentUserService.getCurrentUserEntity();
 
         // Validate dates
         if (request.getEndDate().isBefore(request.getStartDate())) {
@@ -83,7 +84,7 @@ public class ItineraryService {
     // Get user's own itineraries
     @Transactional(readOnly = true)
     public Page<ItineraryResponse> getUserItineraries(Pageable pageable) {
-        User currentUser = userService.getCurrentUserEntity();
+        User currentUser = currentUserService.getCurrentUserEntity();
         log.debug("Fetching itineraries for user: {}", currentUser.getId());
 
         Page<Itinerary> itineraries = itineraryRepository.findByUserId(currentUser.getId(), pageable);
@@ -97,7 +98,7 @@ public class ItineraryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Itinerary", "id", id));
 
         // Check if user owns the itinerary or it's public
-        User currentUser = userService.getCurrentUserEntity();
+        User currentUser = currentUserService.getCurrentUserEntity();
         if (!itinerary.isOwner(currentUser) && !itinerary.getIsPublic()) {
             throw new AppException("You don't have permission to view this itinerary");
         }
@@ -219,7 +220,7 @@ public class ItineraryService {
     public Page<ItineraryResponse> getPublicItineraries(Pageable pageable) {
         log.debug("Fetching public itineraries");
 
-        User currentUser = userService.getCurrentUserEntity();
+        User currentUser = currentUserService.getCurrentUserEntity();
         Page<Itinerary> itineraries;
 
         if (currentUser != null) {
@@ -240,7 +241,7 @@ public class ItineraryService {
         Itinerary itinerary = itineraryRepository.findById(itineraryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Itinerary", "id", itineraryId));
 
-        User currentUser = userService.getCurrentUserEntity();
+        User currentUser = currentUserService.getCurrentUserEntity();
         if (!itinerary.isOwner(currentUser)) {
             throw new AppException("You don't own this itinerary");
         }

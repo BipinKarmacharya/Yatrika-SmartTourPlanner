@@ -60,6 +60,11 @@ public class User extends BaseEntity {
     @Column(name = "profile_image_url")
     private String profileImageUrl;
 
+    @Column(name = "deactivated_at")
+    private LocalDateTime deactivatedAt;
+
+    @Column(name = "deactivation_reason")
+    private String deactivationReason;
     // Helper methods
     public String getFullName() {
         return (firstName != null ? firstName + " " : "") +

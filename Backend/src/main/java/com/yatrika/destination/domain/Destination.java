@@ -2,6 +2,8 @@ package com.yatrika.destination.domain;
 
 import com.yatrika.shared.domain.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -45,9 +47,13 @@ public class Destination extends BaseEntity {
 
     private String fullAddress;
 
-    @Column(precision = 10, scale = 8)
+    @Min(value = -90, message = "Latitude must be at least -90")
+    @Max(value = 90, message = "Latitude must be at most 90")
+    @Column(precision = 11, scale = 8)
     private BigDecimal latitude;
 
+    @Min(value = -180, message = "Longitude must be at least -180")
+    @Max(value = 180, message = "Longitude must be at most 180")
     @Column(precision = 11, scale = 8)
     private BigDecimal longitude;
 
@@ -141,7 +147,7 @@ public class Destination extends BaseEntity {
     private LocalDateTime lastVerifiedAt;
 
     // Relationships
-    @OneToMany(mappedBy = "destination", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "destination", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<DestinationImage> images = new ArrayList<>();
 
@@ -153,6 +159,10 @@ public class Destination extends BaseEntity {
     public void addImage(DestinationImage image) {
         images.add(image);
         image.setDestination(this);
+    }
+    public void removeImage(DestinationImage image) {
+        images.remove(image);
+        image.setDestination(null);
     }
 
     public void addOperatingHour(OperatingHour hour) {

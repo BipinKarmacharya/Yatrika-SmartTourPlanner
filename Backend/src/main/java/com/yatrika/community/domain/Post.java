@@ -49,6 +49,14 @@ public class Post extends BaseEntity {
     @Builder.Default
     private Integer totalLikes = 0;
 
+    @Column(name = "destination", length = 100)
+    private String destination;
+
+    @ElementCollection
+    @CollectionTable(name = "post_tags", joinColumns = @JoinColumn(name = "post_id"))
+    @Column(name = "tag")
+    private List<String> tags = new ArrayList<>();
+
     // Relationships
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

@@ -81,8 +81,8 @@ CREATE TABLE IF NOT EXISTS destinations (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT chk_coordinates CHECK (
-        latitude BETWEEN 26.0 AND 30.5 AND
-        longitude BETWEEN 80.0 AND 88.5
+        latitude BETWEEN -90.0 AND 90.0 AND
+        longitude BETWEEN -180.0 AND 180.0
     )
 );
 
