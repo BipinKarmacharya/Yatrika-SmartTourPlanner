@@ -16,8 +16,8 @@ import java.util.List;
 @Configuration
 public class OpenApiConfig {
 
-    @Value("${server.servlet.context-path:/api}")
-    private String contextPath;
+//    @Value("${server.servlet.context-path:/api}")
+//    private String contextPath;
 
     @Bean
     public OpenAPI yatrikaOpenAPI() {
@@ -33,14 +33,14 @@ public class OpenApiConfig {
                         .license(new License()
                                 .name("Apache 2.0")
                                 .url("https://www.apache.org/licenses/LICENSE-2.0")))
-                .servers(List.of(
-                        new Server()
-                                .url("http://localhost:8080" + contextPath)
-                                .description("Development Server"),
-                        new Server()
-                                .url("https://api.yatrika.com" + contextPath)
-                                .description("Production Server")
-                ))
+//                .servers(List.of(
+//                        new Server()
+//                                .url("http://localhost:8080" + contextPath)
+//                                .description("Development Server"),
+//                        new Server()
+//                                .url("https://api.yatrika.com" + contextPath)
+//                                .description("Production Server")
+//                ))
                 .components(new Components()
                         .addSecuritySchemes("bearerAuth",
                                 new SecurityScheme()

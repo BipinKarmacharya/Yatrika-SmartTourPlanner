@@ -10,7 +10,7 @@ import com.yatrika.review.repository.ReviewRepository;
 import com.yatrika.shared.exception.AppException;
 import com.yatrika.shared.exception.ResourceNotFoundException;
 import com.yatrika.user.domain.User;
-import com.yatrika.user.service.AuthService;
+import com.yatrika.user.service.CurrentUserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +28,12 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final DestinationRepository destinationRepository;
-    private final AuthService authService;
+    private final CurrentUserService currentUserService;
     private final ReviewMapper reviewMapper;
 
     @Transactional
     public ReviewResponse createReview(ReviewRequest request) {
-        User currentUser = authService.getCurrentUserEntity();
+        User currentUser = currentUserService.getCurrentUserEntity();
         Destination destination = destinationRepository.findById(request.getDestinationId())
                 .orElseThrow(() -> new ResourceNotFoundException("Destination", "id", request.getDestinationId()));
 
@@ -65,7 +65,7 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review", "id", reviewId));
 
-        User currentUser = authService.getCurrentUserEntity();
+        User currentUser = currentUserService.getCurrentUserEntity();
         if (!review.isByUser(currentUser.getId())) {
             throw new AppException("You can only update your own reviews");
         }
@@ -100,7 +100,7 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review", "id", reviewId));
 
-        User currentUser = authService.getCurrentUserEntity();
+        User currentUser = currentUserService.getCurrentUserEntity();
         if (!review.isByUser(currentUser.getId())) {
             throw new AppException("You can only delete your own reviews");
         }
@@ -122,7 +122,7 @@ public class ReviewService {
     }
 
     public Page<ReviewResponse> getMyReviews(Pageable pageable) {
-        User currentUser = authService.getCurrentUserEntity();
+        User currentUser = currentUserService.getCurrentUserEntity();
         Page<Review> reviews = reviewRepository.findByUserId(currentUser.getId(), pageable);
         return reviews.map(reviewMapper::toResponse);
     }

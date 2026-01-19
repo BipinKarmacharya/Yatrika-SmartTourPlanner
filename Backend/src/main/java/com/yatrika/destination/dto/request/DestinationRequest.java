@@ -8,6 +8,7 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 public class DestinationRequest {
@@ -68,4 +69,13 @@ public class DestinationRequest {
     private Boolean hasWifi;
 
     private Boolean hasGuideServices;
+
+    private List<ImageRequest> images;
+
+    @Data
+    public static class ImageRequest {
+        private String imageUrl;
+        private String caption;
+        private Boolean isPrimary;
+    }
 }

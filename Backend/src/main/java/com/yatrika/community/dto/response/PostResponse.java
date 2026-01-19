@@ -11,6 +11,8 @@ public class PostResponse {
     private Long id;
     private UserResponse user;
     private String title;
+    private String destination;
+    private List<String> tags;
     private String content;
     private Integer tripDurationDays;
     private Double estimatedCost;

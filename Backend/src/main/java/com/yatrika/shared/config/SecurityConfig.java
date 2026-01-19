@@ -41,13 +41,23 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        .requestMatchers("/").permitAll()      // Allow the root path
+                        .requestMatchers("/error").permitAll() // Allow error pages so you see the real error
+
+                        // Allow access to uploaded files
+                        .requestMatchers("/uploads/**").permitAll()
+
                         // 🔓 PUBLIC/GUEST ACCESS (Like TikTok)
                         .requestMatchers("/api/auth/**").permitAll()           // Auth endpoints
                         .requestMatchers("/api/public/**").permitAll()         // Public content
                         .requestMatchers("/api/health").permitAll()           // Health check
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
                         // 📍 DESTINATIONS: READ for all, WRITE for ADMIN only
                         .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/destinations/with-images").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/destinations/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/destinations/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/destinations/**").hasRole("ADMIN")
@@ -72,10 +82,32 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/community/posts/**").hasRole("USER")
                         .requestMatchers(HttpMethod.DELETE, "/api/community/posts/**").hasRole("USER")
 
+
+                        // File upload endpoints
+                        // 1. Specific Admin Rule
+                        .requestMatchers("/api/uploads/destination/**").hasRole("ADMIN")
+
+                        // 2. Specific User Rules
+                        .requestMatchers("/api/uploads/post/**").hasRole("USER")
+                        .requestMatchers("/api/uploads/profile/**").hasRole("USER")
+
+                        // 3. General Fallback for other upload types (e.g., community media)
+                        .requestMatchers(HttpMethod.POST, "/api/uploads/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/uploads/**").authenticated()
+
+                        // User management endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/users/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/users/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/users/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
+
                         // 🛡️ ADMIN-ONLY FEATURES
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")           // Admin dashboard
                         .requestMatchers("/api/analytics/**").hasRole("ADMIN")        // Analytics
                         .requestMatchers("/api/moderation/**").hasRole("ADMIN")       // Moderation
+
+                        // User flags endpoint
+                        .requestMatchers("/api/flags/**").authenticated()
 
                         // 📚 DOCUMENTATION
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**").permitAll()
@@ -84,6 +116,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -111,8 +144,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8081"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        configuration.setAllowedOriginPatterns(List.of("*")); // ✅ ngrok + localhost + prod
+        configuration.setAllowedMethods(
+                List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
+        );
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);

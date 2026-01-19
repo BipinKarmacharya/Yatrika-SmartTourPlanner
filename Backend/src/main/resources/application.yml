@@ -1,79 +1,47 @@
 spring:
   application:
     name: yatrika-backend
+  profiles:
+    active: ${ENV:dev}
 
-  # Database Configuration
-  datasource:
-    url: jdbc:postgresql://localhost:5432/yatrika
-    username: postgres
-    password: PostgreSQL@2000
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
-      connection-timeout: 30000
-      idle-timeout: 600000
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 30MB
+      enabled: true
 
-  # JPA Configuration
+  # Common JPA/Hibernate settings
   jpa:
-    hibernate:
-      ddl-auto: update
     properties:
       hibernate:
         jdbc:
           time_zone: UTC
           batch_size: 20
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
         order_inserts: true
         order_updates: true
-    show-sql: true
 
-  # Flyway Configuration
-  flyway:
-    enabled: false
-    baseline-on-migrate: true
-    validate-on-migrate: false
-    locations: classpath:db/migration
-    clean-on-validation-error: true
-    clean-disabled: true  # Prevent accidental table drops
-    baseline-version: 1
-
-  # Jackson (JSON) Configuration
+  # Shared Jackson settings
   jackson:
     serialization:
       fail-on-empty-beans: false
       write-dates-as-timestamps: false
     deserialization:
       fail-on-unknown-properties: false
+      accept-empty-string-as-null-object: true
 
-#Server Configuration
 server:
-  port: 8080
+  forward-headers-strategy: framework
   servlet:
     context-path: /
   compression:
     enabled: true
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/json,application/javascript
 
-# Logging
-logging:
-  level:
-    com.yatrika: DEBUG
-    org.springframework.security: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-
-# Custom Properties
-app:
-  jwt:
-    secret: yatrika-secret-key-that-is-very-long-and-secure-for-jwt-tokens-2024
-    expiration: 86400000  # 24 hours in milliseconds
-  cors:
-    allowed-origins: "http://localhost:3000,http://localhost:8081,http://localhost:8080"
-    allowed-methods: "GET,POST,PUT,DELETE,OPTIONS,PATCH"
-    allowed-headers: "*"
-    allow-credentials: true
-    max-age: 3600
+springdoc:
+  swagger-ui:
+    requestInterceptor: |
+      function (request) {
+        request.headers['ngrok-skip-browser-warning'] = 'true';
+        return request;
+      }

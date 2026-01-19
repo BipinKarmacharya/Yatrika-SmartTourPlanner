@@ -11,7 +11,11 @@ public class CreatePostRequest {
     @NotBlank(message = "Title is required")
     private String title;
 
+    private String destination;
+
     private String content;
+
+    private List<String> tags;
 
     private Integer tripDurationDays;
 

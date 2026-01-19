@@ -76,4 +76,20 @@ public interface DestinationRepository extends JpaRepository<Destination, Long> 
 
     // Check if destination exists by name in district
     boolean existsByNameAndDistrict(String name, String district);
+
+    // Admin methods
+    @Query("SELECT d, COUNT(r) as reviewCount FROM Destination d " +
+            "LEFT JOIN Review r ON r.destination.id = d.id " +
+            "GROUP BY d.id ORDER BY reviewCount DESC")
+    List<Object[]> findPopularDestinationsWithReviewCount();
+
+    @Query("SELECT d, COUNT(ii.itinerary) AS itineraryCount FROM Destination d " +
+            // 1. Join Destination (d) with ItineraryItem (ii)
+            "LEFT JOIN ItineraryItem ii ON ii.destination = d " +
+            // 2. Filter using the Itinerary's creation date (accessed via ii.itinerary)
+            "WHERE ii.itinerary.createdAt >= :sinceDate " +
+            "GROUP BY d.id ORDER BY itineraryCount DESC")
+
+    List<Object[]> findPopularDestinationsSince(@Param("sinceDate") java.time.LocalDateTime sinceDate);
+
 }

@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
@@ -30,4 +32,11 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("SELECT p FROM Post p WHERE p.isPublic = true ORDER BY p.totalLikes DESC")
     Page<Post> findTrendingPosts(Pageable pageable);
+
+    @Query("SELECT COUNT(p) FROM Post p WHERE p.createdAt >= :startDate AND p.createdAt <= :endDate")
+    Long countByCreatedAtBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT FUNCTION('HOUR', p.createdAt) as hour, COUNT(p) as count FROM Post p " +
+            "WHERE p.createdAt >= :startDate GROUP BY FUNCTION('HOUR', p.createdAt) ORDER BY hour")
+    List<Object[]> countPostsByHour(@Param("startDate") LocalDateTime startDate);
 }

@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS user_preferences (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT chk_travel_pace CHECK (travel_pace IN ('RELAXED', 'MODERATE', 'FAST_PACED')),
-    CONSTRAINT chk_group_size CHECK (preferred_group_size BETWEEN 1 AND 20)
+    CONSTRAINT chk_group_size CHECK (preferred_group_size BETWEEN 1 AND 100)
 );
 
 -- Create refresh_tokens table for JWT refresh

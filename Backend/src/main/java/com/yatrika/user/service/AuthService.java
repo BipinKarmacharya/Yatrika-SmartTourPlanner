@@ -31,6 +31,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
     private final UserMapper userMapper;
+    private final UserService userService; // Added dependency
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -58,10 +59,11 @@ public class AuthService {
                 .isActive(true)
                 .isEmailVerified(false)
                 .build();
+
         user = userRepository.save(user);
         log.info("User registered successfully: {}", user.getEmail());
 
-        //Generate JWT token
+        // Generate JWT token
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -110,35 +112,5 @@ public class AuthService {
                 .accessToken(jwt)
                 .user(userResponse)
                 .build();
-    }
-
-    /**
-     * Retrieves the authenticated User entity.
-     * Use this method when you need the full JPA entity (e.g., for setting foreign keys).
-     *
-     * @return The User entity for the currently logged-in user.
-     * @throws AppException if the user is not authenticated or not found.
-     */
-    public User getCurrentUserEntity() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        // Check if authentication is null or principal is not UserPrincipal
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserPrincipal)) {
-            throw new AppException("User not authenticated");
-        }
-
-        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-        return userRepository.findById(userPrincipal.getId())
-                .orElseThrow(() -> new AppException("User entity not found for ID: " + userPrincipal.getId()));
-    }
-
-    /**
-     * Retrieves the authenticated user as a DTO.
-     *
-     * @return The UserResponse DTO.
-     */
-    public UserResponse getCurrentUser() {
-        User user = getCurrentUserEntity();
-        return userMapper.toUserResponse(user);
     }
 }

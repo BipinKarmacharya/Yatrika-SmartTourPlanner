@@ -26,10 +26,51 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsServiceImpl userDetailsService;
     private final GuestContext guestContext;
 
+//    @Override
+//    protected void doFilterInternal(HttpServletRequest request,
+//                                    HttpServletResponse response,
+//                                    FilterChain filterChain) throws ServletException, IOException {
+//        try {
+//            String jwt = getJwtFromRequest(request);
+//
+//            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+//                String username = tokenProvider.getUsernameFromToken(jwt);
+//
+//                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+//                UsernamePasswordAuthenticationToken authentication =
+//                        new UsernamePasswordAuthenticationToken(
+//                                userDetails, null, userDetails.getAuthorities());
+//                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+//
+//                SecurityContextHolder.getContext().setAuthentication(authentication);
+//
+//                // Mark as authenticated user (not guest)
+//                guestContext.setGuest(false);
+//            } else {
+//                // No valid JWT - user is guest for protected endpoints
+//                // But public endpoints will still work
+//                log.debug("No valid JWT found, user will be treated as guest");
+//            }
+//        } catch (Exception ex) {
+//            log.error("Could not set user authentication in security context", ex);
+//        }
+//
+//        filterChain.doFilter(request, response);
+//    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
+
+        // ✅ CRITICAL: Always allow CORS preflight
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         try {
             String jwt = getJwtFromRequest(request);
 
@@ -40,15 +81,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                authentication.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                // Mark as authenticated user (not guest)
                 guestContext.setGuest(false);
             } else {
-                // No valid JWT - user is guest for protected endpoints
-                // But public endpoints will still work
                 log.debug("No valid JWT found, user will be treated as guest");
             }
         } catch (Exception ex) {
@@ -57,6 +97,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
 
     private String getJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");

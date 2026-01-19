@@ -10,7 +10,7 @@ import com.yatrika.community.repository.PostRepository;
 import com.yatrika.shared.exception.AppException;
 import com.yatrika.shared.exception.ResourceNotFoundException;
 import com.yatrika.user.domain.User;
-import com.yatrika.user.service.AuthService;
+import com.yatrika.user.service.CurrentUserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,12 +27,12 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
-    private final AuthService authService;
+    private final CurrentUserService currentUserService;
     private final PostMapper postMapper;
 
     @Transactional
     public PostResponse createPost(CreatePostRequest request) {
-        User currentUser = authService.getCurrentUserEntity();
+        User currentUser = currentUserService.getCurrentUserEntity();
 
         Post post = Post.builder()
                 .user(currentUser)
@@ -86,7 +86,7 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
-        User currentUser = authService.getCurrentUserEntity();
+        User currentUser = currentUserService.getCurrentUserEntity();
         if (!post.getUser().getId().equals(currentUser.getId())) {
             throw new AppException("You can only update your own posts");
         }
@@ -105,7 +105,7 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
-        User currentUser = authService.getCurrentUserEntity();
+        User currentUser = currentUserService.getCurrentUserEntity();
         if (!post.getUser().getId().equals(currentUser.getId())) {
             throw new AppException("You can only delete your own posts");
         }
@@ -119,9 +119,11 @@ public class PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
         // Check if user can view the post
-        User currentUser = authService.getCurrentUserEntity();
-        if (!post.getIsPublic() && !post.getUser().getId().equals(currentUser.getId())) {
-            throw new AppException("This post is private");
+        User currentUser = currentUserService.getCurrentUserEntityOrNull();
+        if (!post.getIsPublic()) {
+            if (currentUser == null || !post.getUser().getId().equals(currentUser.getId())) {
+                throw new AppException("This post is private");
+            }
         }
 
         // Increment view count
@@ -132,13 +134,13 @@ public class PostService {
     }
 
     public Page<PostResponse> getMyPosts(Pageable pageable) {
-        User currentUser = authService.getCurrentUserEntity();
+        User currentUser = currentUserService.getCurrentUserEntity();
         Page<Post> posts = postRepository.findByUserId(currentUser.getId(), pageable);
         return posts.map(this::enrichPostResponse);
     }
 
     public Page<PostResponse> getPublicPosts(Pageable pageable) {
-        User currentUser = authService.getCurrentUserEntity();
+        User currentUser = currentUserService.getCurrentUserEntityOrNull();
         Page<Post> posts;
 
         if (currentUser != null) {
@@ -163,7 +165,7 @@ public class PostService {
 
     @Transactional
     public void likePost(Long postId) {
-        User currentUser = authService.getCurrentUserEntity();
+        User currentUser = currentUserService.getCurrentUserEntity();
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
@@ -186,7 +188,7 @@ public class PostService {
 
     @Transactional
     public void unlikePost(Long postId) {
-        User currentUser = authService.getCurrentUserEntity();
+        User currentUser = currentUserService.getCurrentUserEntity();
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
@@ -204,7 +206,7 @@ public class PostService {
         PostResponse response = postMapper.toResponse(post);
 
         // Check if current user has liked this post
-        User currentUser = authService.getCurrentUserEntity();
+        User currentUser = currentUserService.getCurrentUserEntityOrNull();
         if (currentUser != null) {
             boolean isLiked = postLikeRepository.existsByPostIdAndUserId(post.getId(), currentUser.getId());
             response.setIsLikedByCurrentUser(isLiked);
