@@ -10,24 +10,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # This ensures Maven runs inside the Backend folder where your pom.xml lives
     defaults:
       run:
         working-directory: Backend
 
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Set up JDK 21  # Changed from 17 to 21 to match your pom.xml
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: maven
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
 
-      - name: Build with Maven
-        # We don't need --file pom.xml if we set the working-directory above
-        run: mvn clean install
-
-      - name: Update dependency graph
-        uses: advanced-security/maven-dependency-submission-action@v4# Trigger Change
+    - name: Build with Maven
+      run: mvn clean install
