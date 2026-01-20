@@ -162,6 +162,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
+        <finalName>yatrika-backend</finalName>
 	</build>
 
 </project>
