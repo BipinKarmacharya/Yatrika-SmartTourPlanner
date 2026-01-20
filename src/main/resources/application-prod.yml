@@ -1,5 +1,6 @@
 server:
-  port: 443 # Usually behind a proxy, but configured for SSL/Prod
+  port: ${PORT:8080} # Usually behind a proxy, but configured for SSL/Prod
+  forward-headers-strategy: framework
 
 spring:
   datasource:
@@ -7,8 +8,8 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     hikari:
-      maximum-pool-size: 50 # Increased for higher load
-      minimum-idle: 10
+      maximum-pool-size: 20 # Increased for higher load
+      minimum-idle: 5
 
   jpa:
     hibernate:
