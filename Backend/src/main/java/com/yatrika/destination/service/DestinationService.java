@@ -170,27 +170,6 @@ public class DestinationService {
         return destinationMapper.toResponse(destination);
     }
 
-    // Update destination
-//    @Transactional
-//    @CacheEvict(value = "destinations", key = "#id")
-//    public DestinationResponse updateDestination(Long id, DestinationRequest request) {
-//        log.info("Updating destination ID: {}", id);
-//
-//        Destination destination = destinationRepository.findById(id)
-//                .orElseThrow(() -> new ResourceNotFoundException("Destination", "id", id));
-//
-//        // Check if name already exists (excluding current destination)
-//        if (!destination.getName().equals(request.getName()) &&
-//                destinationRepository.existsByNameAndDistrict(request.getName(), request.getDistrict())) {
-//            throw new AppException("Another destination with this name already exists in " + request.getDistrict());
-//        }
-//
-//        destinationMapper.updateEntity(destination, request);
-//        Destination updatedDestination = destinationRepository.save(destination);
-//
-//        log.info("Destination updated successfully: {}", updatedDestination.getName());
-//        return destinationMapper.toResponse(updatedDestination);
-//    }
 
     @Transactional
     @CacheEvict(value = "destinations", key = "#id")
