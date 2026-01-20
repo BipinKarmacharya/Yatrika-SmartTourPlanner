@@ -1,12 +1,4 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Yatrika CI/CD
+name: Java CI with Maven Yatrika
 
 on:
   push:
@@ -18,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # This tells GitHub to run all steps inside the Backend folder
+    # This ensures Maven runs inside the Backend folder where your pom.xml lives
     defaults:
       run:
         working-directory: Backend
@@ -26,11 +18,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK 21  # Changed from 17 to 21 to match your pom.xml
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
+
       - name: Build with Maven
-        run: mvn clean install -f Backend/pom.xml
+        # We don't need --file pom.xml if we set the working-directory above
+        run: mvn clean install
+
+      - name: Update dependency graph
+        uses: advanced-security/maven-dependency-submission-action@v4
