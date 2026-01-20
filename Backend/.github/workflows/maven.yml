@@ -14,7 +14,7 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: yatrika_db
+          POSTGRES_DB: yatrika
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
         ports:
@@ -39,7 +39,7 @@ jobs:
         working-directory: ./Backend
         run: mvn clean install -DskipTests
         env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/yatrika_db
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/yatrika
           SPRING_DATASOURCE_USERNAME: user
           SPRING_DATASOURCE_PASSWORD: password
 
