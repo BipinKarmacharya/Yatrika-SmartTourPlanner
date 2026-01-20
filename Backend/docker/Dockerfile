@@ -17,6 +17,6 @@ COPY --from=build /build/target/yatrika-backend.jar app.jar
 EXPOSE 8080
 
 ENV SPRING_PROFILES_ACTIVE=dev
-ENV SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-sql-yatrika:5432/yatrika
+ENV SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/yatrika
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
