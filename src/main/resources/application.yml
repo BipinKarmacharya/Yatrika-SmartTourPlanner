@@ -2,7 +2,7 @@ spring:
   application:
     name: yatrika-backend
   profiles:
-    active: ${ENV:dev}
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
   servlet:
     multipart:
