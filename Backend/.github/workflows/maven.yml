@@ -32,8 +32,5 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
-          # You also need to tell the cache where the pom.xml is
-          build-path: Backend/pom.xml
-
       - name: Build with Maven
-        run: mvn clean install
+        run: mvn clean install -f Backend/pom.xml
