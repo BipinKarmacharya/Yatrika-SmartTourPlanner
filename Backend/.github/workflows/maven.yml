@@ -36,7 +36,6 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        # Added 'working-directory' because your pom.xml is inside 'Backend'
         working-directory: ./Backend
         run: mvn clean install -DskipTests
         env:
@@ -50,9 +49,7 @@ jobs:
           image: mrbipin/yatrika-backend
           tags: latest
           registry: docker.io
-          # Point to where your Dockerfile actually is
           dockerfile: Backend/docker/Dockerfile
-          # This is critical: set context to Backend so it sees the 'target' folder
           directory: ./Backend
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
