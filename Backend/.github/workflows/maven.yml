@@ -25,9 +25,6 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-    # REMOVED: defaults/run/working-directory: Backend
-    # The runner now executes directly in the root where your pom.xml is located.
-
     steps:
       - uses: actions/checkout@v4
 
@@ -39,13 +36,13 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        # This now runs in the root of your new repo
+        # Added 'working-directory' because your pom.xml is inside 'Backend'
+        working-directory: ./Backend
         run: mvn clean install -DskipTests
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/yatrika_db
           SPRING_DATASOURCE_USERNAME: user
           SPRING_DATASOURCE_PASSWORD: password
-
 
       - name: Build & push Docker image
         uses: mr-smithers-excellent/docker-build-push@v6
@@ -53,6 +50,9 @@ jobs:
           image: mrbipin/yatrika-backend
           tags: latest
           registry: docker.io
-          dockerfile: docker/Dockerfile
+          # Point to where your Dockerfile actually is
+          dockerfile: Backend/docker/Dockerfile
+          # This is critical: set context to Backend so it sees the 'target' folder
+          directory: ./Backend
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
