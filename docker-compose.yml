@@ -1,3 +1,5 @@
+version: '3.9'
+
 services:
   yatrika-backend:
     build:
@@ -9,9 +11,10 @@ services:
       - spring-demo
     depends_on:
       - postgres
+
   postgres:
     container_name: postgres-sql-yatrika
-    image: postgres
+    image: postgres:15
     environment:
       POSTGRES_USER: username
       POSTGRES_PASSWORD: password
@@ -20,28 +23,22 @@ services:
     volumes:
       - postgres:/data/postgres
     ports:
-      - 5433:5432
+      - "5433:5432"
     networks:
       - spring-demo
     restart: unless-stopped
+
   mail-dev:
     container_name: mail-dev-yatrika
     image: maildev/maildev
     ports:
-      - 1080:1080
-      - 1025:1025
-  yatrika-api:
-    container_name: yatrika-api
-    image: yatrika/yatrika:1.0.0
-    ports:
-      - 8080:8080
-    networks:
-      - spring-demo
-    depends_on:
-      - postgres
+      - "1080:1080"
+      - "1025:1025"
+
 networks:
   spring-demo:
     driver: bridge
+
 volumes:
   postgres:
     driver: local
