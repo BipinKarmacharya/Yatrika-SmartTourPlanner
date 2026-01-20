@@ -25,13 +25,16 @@ jobs:
         working-directory: ./Backend
         run: mvn clean install -DskipTests
 
-      - name: Build & push Docker image
-        uses: mr-smithers-excellent/docker-build-push@v6
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
         with:
-          image: mrbipin/yatrika-backend
-          tags: latest
-          registry: docker.io
-          dockerfile: Backend/docker/Dockerfile
-          directory: ./Backend
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Backend
+          file: Backend/docker/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/yatrika-backend:latest
