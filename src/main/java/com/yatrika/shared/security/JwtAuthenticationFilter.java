@@ -26,37 +26,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsServiceImpl userDetailsService;
     private final GuestContext guestContext;
 
-//    @Override
-//    protected void doFilterInternal(HttpServletRequest request,
-//                                    HttpServletResponse response,
-//                                    FilterChain filterChain) throws ServletException, IOException {
-//        try {
-//            String jwt = getJwtFromRequest(request);
-//
-//            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-//                String username = tokenProvider.getUsernameFromToken(jwt);
-//
-//                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-//                UsernamePasswordAuthenticationToken authentication =
-//                        new UsernamePasswordAuthenticationToken(
-//                                userDetails, null, userDetails.getAuthorities());
-//                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-//
-//                SecurityContextHolder.getContext().setAuthentication(authentication);
-//
-//                // Mark as authenticated user (not guest)
-//                guestContext.setGuest(false);
-//            } else {
-//                // No valid JWT - user is guest for protected endpoints
-//                // But public endpoints will still work
-//                log.debug("No valid JWT found, user will be treated as guest");
-//            }
-//        } catch (Exception ex) {
-//            log.error("Could not set user authentication in security context", ex);
-//        }
-//
-//        filterChain.doFilter(request, response);
-//    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
