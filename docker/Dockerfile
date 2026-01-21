@@ -23,4 +23,4 @@ EXPOSE 8080
 ENV SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/yatrika
 
 # Run the app
-ENTRYPOINT ["java", "-jar", "app.jar"]
+CMD ["java", "-jar", "app.jar"]
