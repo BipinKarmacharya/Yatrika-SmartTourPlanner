@@ -1,13 +1,16 @@
 server:
   port: ${PORT:8080}
-  forward-headers-strategy: framework
 
 spring:
+  config:
+    activate:
+      on-profile: prod
+
   datasource:
     url: ${DATABASE_URL}
-    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD}
     hikari:
-      maximum-pool-size: 10
       minimum-idle: 2
       connection-timeout: 30000
 
@@ -15,15 +18,9 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: false
-    properties:
-      hibernate:
-        format_sql: false
 
   flyway:
-    enabled: false
-    url: ${DATABASE_URL}   # 🔥 THIS FIXES THE CRASH
-    baseline-on-migrate: true
-    validate-on-migrate: true
+    url: ${DATABASE_URL}
 
 logging:
   level:
@@ -36,7 +33,7 @@ app:
     secret: ${JWT_SECRET}
     expiration: 3600000
   cors:
-    allowed-origins: "https://production-domain.com"
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:"https://production-domain.com"}
     allow-credentials: true
   upload:
     dir: /var/www/yatrika/uploads

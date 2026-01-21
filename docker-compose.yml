@@ -1,44 +1,48 @@
 version: '3.9'
 
 services:
+  postgres:
+    image: postgres:18
+    container_name: yatrika-postgres
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:password}
+      POSTGRES_DB: ${DB_NAME:yatrika}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - yatrika-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   yatrika-backend:
     build:
       context: .
       dockerfile: docker/Dockerfile
+    container_name: yatrika-backend
     ports:
-      - "8088:8080"
-    networks:
-      - spring-demo
-    depends_on:
-      - postgres
-
-  postgres:
-    container_name: postgres-sql-yatrika
-    image: postgres:15
+      - "8080:8080"
     environment:
-      POSTGRES_USER: username
-      POSTGRES_PASSWORD: password
-      PGDATA: /var/lib/postgresql/data
-      POSTGRES_DB: yatrika
-    volumes:
-      - postgres:/data/postgres
-    ports:
-      - "5433:5432"
+      - SPRING_PROFILES_ACTIVE=prod
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/${DB_NAME:yatrika}
+      - DB_USERNAME=${DB_USERNAME:postgres}
+      - DB_PASSWORD=${DB_PASSWORD:password}
+      - JWT_SECRET=${JWT_SECRET:your-jwt-secret-key-for-production-2024-change-this}
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
-      - spring-demo
-    restart: unless-stopped
-
-  mail-dev:
-    container_name: mail-dev-yatrika
-    image: maildev/maildev
-    ports:
-      - "1080:1080"
-      - "1025:1025"
+      - yatrika-network
 
 networks:
-  spring-demo:
+  yatrika-network:
     driver: bridge
 
 volumes:
-  postgres:
-    driver: local
+  postgres_data:
