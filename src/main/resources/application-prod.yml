@@ -10,8 +10,8 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: validate
-    show-sql: false
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:validate}
+      show-sql: false
   flyway:
     enabled: false # Keep false if you haven't set up migration scripts yet
 

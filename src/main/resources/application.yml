@@ -19,7 +19,6 @@ spring:
         jdbc:
           time_zone: UTC
           batch_size: 20
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         order_inserts: true
         order_updates: true
 
