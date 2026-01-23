@@ -1,44 +1,40 @@
 version: '3.9'
 
 services:
-  yatrika-backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8088:8080"
-    networks:
-      - spring-demo
-    depends_on:
-      - postgres
-
-  postgres:
-    container_name: postgres-sql-yatrika
-    image: postgres:15
+  db:
+    image: postgres:15-alpine
+    container_name: yatrika-db-dev
     environment:
-      POSTGRES_USER: postgres  # Hardcoded value
-      POSTGRES_PASSWORD: PostgreSQL@2000   # Hardcoded value
-      PGDATA: /var/lib/postgresql/data
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: yatrika
-    volumes:
-      - postgres:/data/postgres
     ports:
-      - "5433:5432"
-    networks:
-      - spring-demo
-    restart: unless-stopped
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    container_name: yatrika-api
+    ports:
+      - "8080:8080"
+    environment:
+      # These match the placeholders in your application.yml
+      - SPRING_PROFILES_ACTIVE=dev
+      - DATABASE_URL=jdbc:postgresql://db:5432/yatrika
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=password
+      - JWT_SECRET=yatrika-dev-secret-key-very-long-and-secure-for-local
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000
+    depends_on:
+      - db
 
   mail-dev:
-    container_name: mail-dev-yatrika
     image: maildev/maildev
+    container_name: yatrika-mail
     ports:
       - "1080:1080"
       - "1025:1025"
 
-networks:
-  spring-demo:
-    driver: bridge
-
 volumes:
-  postgres:
-    driver: local
+  postgres_data:

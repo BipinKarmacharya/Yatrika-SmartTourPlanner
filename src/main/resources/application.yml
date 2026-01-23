@@ -1,16 +1,18 @@
 spring:
   application:
     name: yatrika-backend
-
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:prod}
-
+    active: ${SPRING_PROFILES_ACTIVE:dev} # Default to dev for local work
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 30MB
-      enabled: true
-
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
   jpa:
     properties:
       hibernate:
@@ -21,42 +23,8 @@ spring:
         order_inserts: true
         order_updates: true
 
-  jackson:
-    serialization:
-      fail-on-empty-beans: false
-      write-dates-as-timestamps: false
-    deserialization:
-      fail-on-unknown-properties: false
-      accept-empty-string-as-null-object: true
-
 server:
+  port: ${PORT:8080}
   forward-headers-strategy: framework
-  servlet:
-    context-path: /
   compression:
     enabled: true
-    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/json,application/javascript
-
-# Common database settings
-spring.datasource:
-  driver-class-name: org.postgresql.Driver
-  hikari:
-    maximum-pool-size: 10
-
-# Common JPA settings
-spring.jpa:
-  show-sql: false
-  properties:
-    hibernate:
-      format_sql: false
-
-# Common Flyway settings
-spring.flyway:
-  enabled: true
-  baseline-on-migrate: true
-  validate-on-migrate: true
-
-# Common app settings
-app:
-  cors:
-    allowed-methods: "GET,POST,PUT,DELETE,OPTIONS,PATCH"
