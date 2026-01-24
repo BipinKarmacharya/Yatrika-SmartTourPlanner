@@ -1,4 +1,3 @@
-// Update @PreAuthorize annotations in DestinationController
 package com.yatrika.destination.controller;
 
 import com.yatrika.destination.dto.request.DestinationRequest;
@@ -7,6 +6,9 @@ import com.yatrika.destination.dto.request.NearbySearchRequest;
 import com.yatrika.destination.dto.response.DestinationResponse;
 import com.yatrika.destination.service.DestinationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -106,8 +108,16 @@ public class DestinationController {
 
     @PostMapping(value = "/with-images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Create a new destination with Images (Admin only)",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
     public ResponseEntity<DestinationResponse> createWithImages(
-            @RequestPart("destination") @Valid DestinationRequest request,
+            @Parameter(
+                    description = "Destination details in JSON format",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            )
+            @RequestParam("destination") @Valid DestinationRequest request,
             @RequestPart("files") MultipartFile[] files) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
