@@ -7,6 +7,8 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.NaturalId;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users",
@@ -59,6 +61,11 @@ public class User extends BaseEntity {
 
     @Column(name = "profile_image_url")
     private String profileImageUrl;
+
+    @ElementCollection
+    @CollectionTable(name = "user_interests", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "interest")
+    private List<String> interests = new ArrayList<>();
 
     @Column(name = "deactivated_at")
     private LocalDateTime deactivatedAt;

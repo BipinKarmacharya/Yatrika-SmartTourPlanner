@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class CreatePostRequest {
@@ -15,7 +16,7 @@ public class CreatePostRequest {
 
     private String content;
 
-    private List<String> tags;
+    private Set<String> tags;
 
     private Integer tripDurationDays;
 
@@ -26,7 +27,7 @@ public class CreatePostRequest {
     @NotNull
     private Boolean isPublic = true;
 
-    private List<PostMediaRequest> media;
+    private Set<PostMediaRequest> media;
 
     private List<PostDayRequest> days;
 }

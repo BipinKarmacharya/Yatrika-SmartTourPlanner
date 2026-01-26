@@ -16,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -76,6 +78,16 @@ public class UserService {
         log.info("User updated: {}", user.getId());
 
         return userMapper.toUserResponse(updatedUser);
+    }
+
+    @Transactional
+    public User updateUserInterests(Long userId, List<String> interests) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // JPA will handle the collection table update automatically
+        user.setInterests(interests);
+        return userRepository.save(user);
     }
 
     @Transactional

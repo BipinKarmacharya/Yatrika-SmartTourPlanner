@@ -1,18 +1,20 @@
 package com.yatrika.community.dto.response;
 
 import com.yatrika.user.dto.response.UserResponse;
+import com.yatrika.user.dto.response.UserSummaryResponse;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class PostResponse {
     private Long id;
-    private UserResponse user;
+    private UserSummaryResponse user;
     private String title;
     private String destination;
-    private List<String> tags;
+    private Set<String> tags;
     private String content;
     private Integer tripDurationDays;
     private Double estimatedCost;

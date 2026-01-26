@@ -1,7 +1,5 @@
 package com.yatrika.itinerary.dto.request;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -10,33 +8,18 @@ import java.time.LocalTime;
 
 @Data
 public class ItineraryItemRequest {
-
     @NotNull(message = "Destination ID is required")
     private Long destinationId;
 
     @NotNull(message = "Day number is required")
-    @Min(value = 1, message = "Day number must be at least 1")
     private Integer dayNumber;
 
-    @NotNull(message = "Order in day is required")
-    @Min(value = 0, message = "Order must be at least 0")
+    @NotNull(message = "Order is required")
     private Integer orderInDay;
-
-    private LocalTime startTime;
-
-    private LocalTime endTime;
-
-    private Integer durationMinutes;
-
-    @NotBlank(message = "Activity type is required")
-    private String activityType;
-
-    @NotBlank(message = "Title is required")
-    private String title;
-
-    private String description;
-
-    private String notes;
-
     private BigDecimal estimatedCost;
+    private String title; // User can override the destination name
+    private String notes;
+    private LocalTime startTime;
+    private LocalTime endTime;
+    private String activityType; // VISIT, MEAL, TRANSPORT
 }
