@@ -4,6 +4,7 @@ import com.yatrika.destination.domain.Destination;
 import com.yatrika.destination.domain.DestinationImage;
 import com.yatrika.destination.dto.request.DestinationRequest;
 import com.yatrika.destination.dto.response.DestinationResponse;
+import com.yatrika.destination.dto.response.DestinationSummaryDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -76,4 +77,6 @@ public interface DestinationMapper {
     default Double mapDouble(BigDecimal value) {
         return value != null ? value.doubleValue() : null;
     }
+
+    DestinationSummaryDTO toSummaryDto(Destination destination);
 }

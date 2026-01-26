@@ -21,7 +21,7 @@ spring:
           batch_size: 20
         order_inserts: true
         order_updates: true
-
+        default_batch_fetch_size: 20
 server:
   port: ${PORT:8080}
   forward-headers-strategy: framework

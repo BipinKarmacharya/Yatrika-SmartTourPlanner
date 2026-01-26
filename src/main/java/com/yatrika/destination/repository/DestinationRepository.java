@@ -32,18 +32,21 @@ public interface DestinationRepository extends JpaRepository<Destination, Long> 
     Page<Destination> search(@Param("query") String query, Pageable pageable);
 
     // Advanced search with multiple filters
-    @Query("SELECT d FROM Destination d WHERE " +
-            "(:name IS NULL OR LOWER(d.name) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
-            "(:district IS NULL OR LOWER(d.district) = LOWER(:district)) AND " +
-            "(:province IS NULL OR LOWER(d.province) = LOWER(:province)) AND " +
-            "(:type IS NULL OR d.type = :type) AND " +
-            "(:category IS NULL OR LOWER(d.category) = LOWER(:category))")
+    // Inside DestinationRepository.java
+
+    @Query(value = "SELECT * FROM destinations d WHERE " +
+            "(:name IS NULL OR :name = '' OR d.name ILIKE %:name%) AND " + // Added :name = ''
+            "(:district IS NULL OR :district = '' OR d.district = :district) AND " +
+            "(:minPrice IS NULL OR d.entrance_fee_local >= :minPrice) AND " +
+            "(:maxPrice IS NULL OR d.entrance_fee_local <= :maxPrice) AND " +
+            "(CAST(:tags AS text[]) IS NULL OR d.tags @> CAST(:tags AS text[]))",
+            nativeQuery = true)
     Page<Destination> advancedSearch(
             @Param("name") String name,
-            @Param("district") String district,
-            @Param("province") String province,
-            @Param("type") DestinationType type,
-            @Param("category") String category,
+            @Param("district") String district, // <--- ADD THIS PARAMETER
+            @Param("minPrice") BigDecimal minPrice,
+            @Param("maxPrice") BigDecimal maxPrice,
+            @Param("tags") String[] tags,
             Pageable pageable
     );
 
@@ -92,4 +95,19 @@ public interface DestinationRepository extends JpaRepository<Destination, Long> 
 
     List<Object[]> findPopularDestinationsSince(@Param("sinceDate") java.time.LocalDateTime sinceDate);
 
+    @Query(value = """
+    SELECT * FROM destinations d 
+    WHERE d.tags && CAST(:interests AS text[]) 
+    OR d.type IN (
+        SELECT DISTINCT type FROM destinations 
+        WHERE tags && CAST(:interests AS text[])
+    )
+    ORDER BY d.average_rating DESC, d.popularity_score DESC
+    LIMIT :limit
+    """, nativeQuery = true)
+    Page<Destination> findRecommendedDestinations(
+            @Param("interests") String[] interests,
+            @Param("limit") int limit,
+            Pageable pageable
+    );
 }

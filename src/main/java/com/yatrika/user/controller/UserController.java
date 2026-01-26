@@ -1,7 +1,9 @@
 package com.yatrika.user.controller;
 
+import com.yatrika.user.domain.User;
 import com.yatrika.user.domain.UserRole;
 import com.yatrika.user.dto.request.UpdateUserRequest;
+import com.yatrika.user.dto.request.UserPreferencesDTO;
 import com.yatrika.user.dto.response.UserResponse;
 import com.yatrika.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +18,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -34,6 +38,16 @@ public class UserController {
     public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
         UserResponse response = userService.getUserById(id);
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}/interests")
+    public ResponseEntity<?> updateInterests(@PathVariable Long id, @RequestBody List<String> interests) {
+        try {
+            User updatedUser = userService.updateUserInterests(id, interests);
+            return ResponseEntity.ok(updatedUser);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error updating interests: " + e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")

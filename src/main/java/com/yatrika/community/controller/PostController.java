@@ -97,11 +97,11 @@ public class PostController {
     @GetMapping("/search")
     @Operation(summary = "Search public posts")
     public ResponseEntity<Page<PostResponse>> searchPosts(
-            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String query,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<PostResponse> response = postService.searchPosts(q, pageable);
+        Page<PostResponse> response = postService.searchPosts(query, pageable);
         return ResponseEntity.ok(response);
     }
 
