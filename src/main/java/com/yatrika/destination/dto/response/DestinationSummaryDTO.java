@@ -9,4 +9,6 @@ public class DestinationSummaryDTO {
     private String imageUrl;
     private Double averageRating;
     private String location;
+    private java.math.BigDecimal latitude;
+    private java.math.BigDecimal longitude;
 }

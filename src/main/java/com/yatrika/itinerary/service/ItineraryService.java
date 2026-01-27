@@ -16,6 +16,7 @@ public interface ItineraryService {
     // Discovery Tabs
     List<ItineraryResponse> getAdminTemplates();
     Page<ItineraryResponse> getPublicCommunityTrips(Pageable pageable);
+    ItineraryResponse getItineraryById(Long id);
 
     // Personal Management
     Page<ItineraryResponse> getMyItineraries(Long userId, Pageable pageable);
