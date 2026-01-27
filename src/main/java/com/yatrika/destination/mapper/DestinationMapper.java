@@ -45,6 +45,8 @@ public interface DestinationMapper {
     // you must change these to map actual fields or use expressions.
     @Mapping(target = "locationString", expression = "java(destination.getLocationString())")
     @Mapping(target = "freeEntry", expression = "java(destination.isFreeEntry())")
+    @Mapping(target = "latitude", source = "latitude")
+    @Mapping(target = "longitude", source = "longitude")
     DestinationResponse toResponse(Destination destination);
 
     DestinationResponse.DestinationImageResponse toImageResponse(DestinationImage image);

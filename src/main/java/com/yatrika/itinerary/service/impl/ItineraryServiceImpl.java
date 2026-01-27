@@ -12,6 +12,7 @@ import com.yatrika.itinerary.dto.response.ItinerarySummary;
 import com.yatrika.itinerary.mapper.ItineraryMapper;
 import com.yatrika.itinerary.repository.ItineraryRepository;
 import com.yatrika.itinerary.service.ItineraryService;
+import com.yatrika.shared.exception.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional; // Use Spring's Transactional
@@ -88,6 +89,13 @@ public class ItineraryServiceImpl implements ItineraryService {
                 .stream()
                 .map(itineraryMapper::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public ItineraryResponse getItineraryById(Long id) {
+        Itinerary itinerary = itineraryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Itinerary not found with id: " + id));
+        return itineraryMapper.toResponse(itinerary);
     }
 
     @Override

@@ -33,6 +33,12 @@ public class ItineraryController {
         return ResponseEntity.ok(itineraryService.getAdminTemplates());
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Get full details of a specific itinerary including its items")
+    public ResponseEntity<ItineraryResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(itineraryService.getItineraryById(id));
+    }
+
     @GetMapping("/community")
     @Operation(summary = "Tab 3: Get public trips shared by other users")
     public ResponseEntity<Page<ItineraryResponse>> getPublicTrips(Pageable pageable) {

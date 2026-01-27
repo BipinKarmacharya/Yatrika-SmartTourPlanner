@@ -44,80 +44,93 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+
+                        // ========================
+                        // 🌍 CORS / PREFLIGHT
+                        // ========================
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        .requestMatchers("/").permitAll()      // Allow the root path
-                        .requestMatchers("/error").permitAll() // Allow error pages so you see the real error
+                        // ========================
+                        // 🌐 PUBLIC
+                        // ========================
+                        .requestMatchers(
+                                "/",
+                                "/error",
+                                "/uploads/**",
+                                "/api/auth/**",
+                                "/api/public/**",
+                                "/api/health",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/api-docs/**"
+                        ).permitAll()
 
-                        // Allow access to uploaded files
-                        .requestMatchers("/uploads/**").permitAll()
-
-                        // 🔓 PUBLIC/GUEST ACCESS (Like TikTok)
-                        .requestMatchers("/api/auth/**").permitAll()           // Auth endpoints
-                        .requestMatchers("/api/public/**").permitAll()         // Public content
-                        .requestMatchers("/api/health").permitAll()           // Health check
-                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-
-                        // 📍 DESTINATIONS: READ for all, WRITE for ADMIN only
+                        // ========================
+                        // 📍 DESTINATIONS (PUBLIC READ)
+                        // ========================
                         .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/destinations/with-images").hasRole("ADMIN")
+
+                        // ========================
+                        // 🛡️ ADMIN (ALL ADMIN APIs)
+                        // ========================
+                        .requestMatchers(HttpMethod.GET,"/api/v1/itineraries/admin-templates").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/itineraries/{id}").permitAll()
+
+                        .requestMatchers(
+                                "/api/v1/admin/**",
+                                "/api/admin/**",
+                                "/api/analytics/**",
+                                "/api/moderation/**"
+                        ).hasRole("ADMIN")
+
                         .requestMatchers(HttpMethod.POST, "/api/destinations/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/destinations/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/destinations/**").hasRole("ADMIN")
 
-                        // 👤 USER-ONLY FEATURES
-                        .requestMatchers("/api/itineraries/**").hasRole("USER")       // Trip planning
-                        .requestMatchers("/api/reviews/**").hasRole("USER")           // Reviews
-                        .requestMatchers("/api/likes/**").hasRole("USER")             // Likes
-                        .requestMatchers("/api/bookmarks/**").hasRole("USER")         // Bookmarks
-                        .requestMatchers("/api/profile/**").hasRole("USER")           // User profile
+                        .requestMatchers("/api/uploads/destination/**").hasRole("ADMIN")
 
-                        // User review for destination
-                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/api/reviews/**/verify").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
+
+                        // ========================
+                        // 👤 USER
+                        // ========================
+                        .requestMatchers(
+                                "/api/itineraries/**",
+                                "/api/likes/**",
+                                "/api/bookmarks/**",
+                                "/api/profile/**"
+                        ).hasRole("USER")
+
                         .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasRole("USER")
                         .requestMatchers(HttpMethod.PUT, "/api/reviews/**").hasRole("USER")
                         .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").hasRole("USER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/reviews/**/verify").hasRole("ADMIN")
 
-                        // Community posts endpoints
-                        .requestMatchers(HttpMethod.GET, "/api/community/posts/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/community/posts/**").hasRole("USER")
                         .requestMatchers(HttpMethod.PUT, "/api/community/posts/**").hasRole("USER")
                         .requestMatchers(HttpMethod.DELETE, "/api/community/posts/**").hasRole("USER")
 
-
-                        // File upload endpoints
-                        // 1. Specific Admin Rule
-                        .requestMatchers("/api/uploads/destination/**").hasRole("ADMIN")
-
-                        // 2. Specific User Rules
                         .requestMatchers("/api/uploads/post/**").hasRole("USER")
                         .requestMatchers("/api/uploads/profile/**").hasRole("USER")
 
-                        // 3. General Fallback for other upload types (e.g., community media)
+                        // ========================
+                        // 🔐 AUTHENTICATED (ANY USER)
+                        // ========================
+                        .requestMatchers(
+                                "/api/users/**",
+                                "/api/flags/**"
+                        ).authenticated()
+
                         .requestMatchers(HttpMethod.POST, "/api/uploads/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/uploads/**").authenticated()
 
-                        // User management endpoints
-                        .requestMatchers(HttpMethod.GET, "/api/users/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/users/**").authenticated()
-                        .requestMatchers(HttpMethod.PATCH, "/api/users/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
-
-                        // 🛡️ ADMIN-ONLY FEATURES
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")           // Admin dashboard
-                        .requestMatchers("/api/analytics/**").hasRole("ADMIN")        // Analytics
-                        .requestMatchers("/api/moderation/**").hasRole("ADMIN")       // Moderation
-
-                        // User flags endpoint
-                        .requestMatchers("/api/flags/**").authenticated()
-
-                        // 📚 DOCUMENTATION
-                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**").permitAll()
-
-                        // 🔒 Everything else requires authentication
+                        // ========================
+                        // 🔒 FALLBACK
+                        // ========================
                         .anyRequest().authenticated()
                 )
+
                 .authenticationProvider(authenticationProvider())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -144,24 +157,28 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+
         CorsConfiguration configuration = new CorsConfiguration();
 
         List<String> origins = Arrays.asList(allowedOrigins.split(","));
 
-        configuration.setAllowedOriginPatterns(List.of("*")); // ✅ ngrok + localhost + prod
+        configuration.setAllowedOrigins(origins);
         configuration.setAllowedMethods(
                 List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
         );
-        configuration.setAllowedOrigins(origins);
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
         source.registerCorsConfiguration("/**", configuration);
+
         return source;
     }
+
 }
