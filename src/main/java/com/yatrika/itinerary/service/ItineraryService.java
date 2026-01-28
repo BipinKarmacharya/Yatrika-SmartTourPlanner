@@ -10,32 +10,30 @@ import java.util.List;
 
 public interface ItineraryService {
 
-    // Core Creation
+    // --- CORE CREATION & DISCOVERY ---
     ItineraryResponse createEmptyTrip(ItineraryRequest request, Long userId);
-
-    // Discovery Tabs
     List<ItineraryResponse> getAdminTemplates();
     Page<ItineraryResponse> getPublicCommunityTrips(Pageable pageable);
     ItineraryResponse getItineraryById(Long id);
+    Page<ItineraryResponse> searchPublicItineraries(ItineraryFilterRequest filter, Pageable pageable);
 
-    // Personal Management
+    // --- PERSONAL MANAGEMENT ---
     Page<ItineraryResponse> getMyItineraries(Long userId, Pageable pageable);
+    ItineraryResponse updateItineraryHeader(Long id, ItineraryRequest request, Long userId); // Added
+    ItineraryResponse completeTrip(Long itineraryId, Long userId);
 
-    // Copy & Share Logic
+    // --- COPY & SHARE LOGIC ---
     ItineraryResponse copyItinerary(Long targetItineraryId, Long currentUserId);
     ItineraryResponse shareTrip(Long itineraryId, Long currentUserId);
 
-    // --- ITEM MANAGEMENT (The new methods) ---
-
+    // --- ITEM & ACTIVITY MANAGEMENT ---
     ItineraryResponse addItemToItinerary(Long itineraryId, ItineraryItemRequest itemRequest, Long userId);
-
     ItineraryResponse updateItem(Long itineraryId, Long itemId, ItineraryItemRequest request, Long userId);
-
+    void toggleItemVisited(Long itineraryId, Long itemId, Boolean visited, Long userId); // Added
+    void reorderItems(Long itineraryId, List<Long> itemIdsInOrder, Long userId); // Added
     void removeItem(Long itineraryId, Long itemId, Long userId);
 
+    // --- ADMIN SPECIFIC ---
     ItineraryResponse createAdminTemplate(ItineraryRequest request);
     ItineraryResponse addItemToTemplate(Long templateId, ItineraryItemRequest itemRequest);
-    Page<ItineraryResponse> searchPublicItineraries(ItineraryFilterRequest filter, Pageable pageable);
-
-    ItineraryResponse completeTrip(Long itineraryId, Long userId);
 }
