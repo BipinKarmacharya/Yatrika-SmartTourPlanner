@@ -1,3 +1,4 @@
+// ItineraryMapper.java - FIXED VERSION
 package com.yatrika.itinerary.mapper;
 
 import com.yatrika.itinerary.domain.Itinerary;
@@ -6,21 +7,25 @@ import com.yatrika.itinerary.dto.response.ItineraryItemResponse;
 import com.yatrika.itinerary.dto.response.ItineraryResponse;
 import com.yatrika.itinerary.dto.response.ItinerarySummary;
 import com.yatrika.destination.mapper.DestinationMapper;
+import com.yatrika.user.mapper.UserMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring", uses = {DestinationMapper.class})
+@Mapper(componentModel = "spring", uses = {DestinationMapper.class, UserMapper.class})
 public abstract class ItineraryMapper {
 
-    // Main mapping: We tell MapStruct to call our custom method for the 'summary' field
+    // Main mapping: Use MapStruct's built-in mapping for user
     @Mapping(target = "items", source = "items")
     @Mapping(target = "summary", expression = "java(calculateSummary(itinerary))")
+    @Mapping(target = "user", source = "user") // Let MapStruct handle this
+
     public abstract ItineraryResponse toResponse(Itinerary itinerary);
 
     // Item mapping
+    @Mapping(target = "isVisited", source = "isVisited")
     public abstract ItineraryItemResponse toItemResponse(ItineraryItem item);
 
     // Custom logic to build the summary object

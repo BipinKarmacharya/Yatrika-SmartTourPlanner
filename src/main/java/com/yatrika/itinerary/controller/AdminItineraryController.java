@@ -22,6 +22,8 @@ public class AdminItineraryController {
 
     private final ItineraryService itineraryService;
 
+    // ================= TEMPLATE =================
+
     @PostMapping
     @Operation(
             summary = "Create an admin itinerary template (Admin only)",
@@ -32,6 +34,34 @@ public class AdminItineraryController {
                 .body(itineraryService.createAdminTemplate(request));
     }
 
+    @PutMapping("/{id}")
+    @Operation(
+            summary = "Update admin template header",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<ItineraryResponse> updateTemplate(
+            @PathVariable Long id,
+            @RequestBody ItineraryRequest request) {
+
+        return ResponseEntity.ok(
+                itineraryService.updateAdminTemplate(id, request)
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(
+            summary = "Delete admin template",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<Void> deleteTemplate(@PathVariable Long id) {
+
+        itineraryService.removeAdminTemplate(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
+    // ================= TEMPLATE ITEMS =================
+
     @PostMapping("/{id}/items")
     @Operation(
             summary = "Create an admin itinerary items template (Admin only)",
@@ -40,4 +70,46 @@ public class AdminItineraryController {
     public ResponseEntity<ItineraryResponse> addItem(@PathVariable Long id, @RequestBody ItineraryItemRequest request) {
         return ResponseEntity.ok(itineraryService.addItemToTemplate(id, request));
     }
+
+    @PutMapping("/{id}/items/{itemId}")
+    @Operation(
+            summary = "Update admin template item",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<ItineraryResponse> updateItem(
+            @PathVariable Long id,
+            @PathVariable Long itemId,
+            @RequestBody ItineraryItemRequest request) {
+
+        return ResponseEntity.ok(
+                itineraryService.updateTemplateItem(id, itemId, request)
+        );
+    }
+
+    @DeleteMapping("/{id}/items/{itemId}")
+    @Operation(
+            summary = "Delete admin template item",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<Void> deleteItem(
+            @PathVariable Long id,
+            @PathVariable Long itemId) {
+
+        itineraryService.removeItemFromTemplate(id, itemId);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ================= BULK REPLACE (OPTIONAL) =================
+
+    @PutMapping("/{id}/full")
+    @Operation(summary = "Replace entire admin template")
+    public ResponseEntity<ItineraryResponse> replaceFullTemplate(
+            @PathVariable Long id,
+            @RequestBody ItineraryRequest request) {
+
+        return ResponseEntity.ok(
+                itineraryService.updateFullAdminTemplate(id, request)
+        );
+    }
+
 }

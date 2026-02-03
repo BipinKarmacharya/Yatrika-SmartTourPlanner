@@ -22,7 +22,7 @@ public interface ItineraryRepository extends JpaRepository<Itinerary, Long>, Jpa
     List<Itinerary> findByStatusAndIsAdminCreatedTrue(ItineraryStatus status);
 
     // TAB 3: Community Shared Trips (Public & Completed)
-    Page<Itinerary> findByStatusAndIsPublicTrueAndIsAdminCreatedFalse(ItineraryStatus status, Pageable pageable);
+    Page<Itinerary> findByStatusAndIsPublicTrueAndIsAdminCreatedFalseAndSourceIdIsNull(ItineraryStatus status, Pageable pageable);
 
 
     // --- USER PERSONAL MANAGEMENT ---

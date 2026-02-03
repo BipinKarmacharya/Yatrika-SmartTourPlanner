@@ -14,5 +14,6 @@ public class ItineraryItemResponse {
     private String activityType;
     private LocalTime startTime;
     private LocalTime endTime;
+    private Boolean isVisited;
     private DestinationSummaryDTO destination;
 }

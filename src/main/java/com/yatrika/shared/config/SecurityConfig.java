@@ -70,15 +70,21 @@ public class SecurityConfig {
                         // 📍 DESTINATIONS (PUBLIC READ)
                         // ========================
                         .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/itineraries/community").permitAll()
+
+                        .requestMatchers(HttpMethod.GET,"/api/v1/itineraries/my-plans").hasRole("USER")
 
                         // ========================
                         // 🛡️ ADMIN (ALL ADMIN APIs)
                         // ========================
                         .requestMatchers(HttpMethod.GET,"/api/v1/itineraries/admin-templates").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/itineraries/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/itineraries/community").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/itineraries/search").permitAll()
+
+//                        .requestMatchers(HttpMethod.PATCH, "/api/v1/itineraries/**").hasRole("USER")
 
                         .requestMatchers(
-                                "/api/v1/admin/**",
+                                "/api/v1/admin/itineraries/**",
                                 "/api/admin/**",
                                 "/api/analytics/**",
                                 "/api/moderation/**"
@@ -97,7 +103,8 @@ public class SecurityConfig {
                         // 👤 USER
                         // ========================
                         .requestMatchers(
-                                "/api/itineraries/**",
+                                "/api/v1/itineraries",
+                                "/api/v1/itineraries/**",
                                 "/api/likes/**",
                                 "/api/bookmarks/**",
                                 "/api/profile/**"

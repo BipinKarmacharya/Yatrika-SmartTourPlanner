@@ -16,10 +16,12 @@ public class ItineraryItemRequest {
 
     @NotNull(message = "Order is required")
     private Integer orderInDay;
-    private BigDecimal estimatedCost;
+
     private String title; // User can override the destination name
     private String notes;
     private LocalTime startTime;
     private LocalTime endTime;
     private String activityType; // VISIT, MEAL, TRANSPORT
+    private BigDecimal estimatedCost;
+    private Boolean isVisited;
 }

@@ -7,6 +7,7 @@ import com.yatrika.itinerary.dto.response.ItineraryResponse;
 import com.yatrika.itinerary.service.ItineraryService;
 import com.yatrika.shared.security.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -58,9 +59,10 @@ public class ItineraryController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('USER')")
     @Operation(summary = "Get full details of any itinerary by ID")
     public ResponseEntity<ItineraryResponse> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(itineraryService.getItineraryById(id));
+        return ResponseEntity.ok(itineraryService.getItineraryById(id, getCurrentUserId()));
     }
 
     // ================= STEP 2: LIFECYCLE (CREATE & COPY) =================
@@ -76,7 +78,10 @@ public class ItineraryController {
 
     @PostMapping("/{id}/copy")
     @PreAuthorize("hasRole('USER')")
-    @Operation(summary = "Copy an Admin template or Public trip to your own plans")
+    @Operation(
+            summary = "Copy an Admin template or Public trip to your own plans",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
     public ResponseEntity<ItineraryResponse> copy(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(itineraryService.copyItinerary(id, getCurrentUserId()));
@@ -87,12 +92,15 @@ public class ItineraryController {
 
     @GetMapping("/my-plans")
     @PreAuthorize("hasRole('USER')")
-    @Operation(summary = "Get current user's personal itineraries")
+    @Operation(
+            summary = "Get current user's personal itineraries",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
     public ResponseEntity<Page<ItineraryResponse>> getMyPlans(Pageable pageable) {
         return ResponseEntity.ok(itineraryService.getMyItineraries(getCurrentUserId(), pageable));
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
     @Operation(summary = "Update itinerary header (Title, dates, etc)")
     public ResponseEntity<ItineraryResponse> updateHeader(
@@ -121,6 +129,19 @@ public class ItineraryController {
             @PathVariable Long itemId,
             @RequestBody ItineraryItemRequest request) {
         return ResponseEntity.ok(itineraryService.updateItem(itineraryId, itemId, request, getCurrentUserId()));
+    }
+
+    @PutMapping("/{id}/full")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(
+            summary = "⚠️ Replace entire itinerary (send ALL items)",
+            description = "This endpoint replaces all existing items. Use only for bulk updates."
+    )
+    public ResponseEntity<ItineraryResponse> updateFullItinerary(
+            @PathVariable Long id,
+            @RequestBody ItineraryRequest request) {
+        // This assumes your ItineraryRequest DTO includes a List<ItineraryItemRequest> items
+        return ResponseEntity.ok(itineraryService.updateFullItinerary(id, request, getCurrentUserId()));
     }
 
     @PatchMapping("/{itineraryId}/items/{itemId}/toggle-visited")
@@ -169,5 +190,40 @@ public class ItineraryController {
     @Operation(summary = "Make your completed original trip public")
     public ResponseEntity<ItineraryResponse> share(@PathVariable Long id) {
         return ResponseEntity.ok(itineraryService.shareTrip(id, getCurrentUserId()));
+    }
+
+    @PatchMapping("/{id}/unshare")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Make your public trip private again")
+    public ResponseEntity<ItineraryResponse> unshare(@PathVariable Long id) {
+        return ResponseEntity.ok(itineraryService.unshareTrip(id, getCurrentUserId()));
+    }
+
+    @PostMapping("/{id}/like")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Like a public itinerary")
+    public ResponseEntity<ItineraryResponse> likeItinerary(@PathVariable Long id) {
+        return ResponseEntity.ok(itineraryService.likeItinerary(id, getCurrentUserId()));
+    }
+
+    @DeleteMapping("/{id}/like")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Unlike a public itinerary")
+    public ResponseEntity<ItineraryResponse> unlikeItinerary(@PathVariable Long id) {
+        return ResponseEntity.ok(itineraryService.unlikeItinerary(id, getCurrentUserId()));
+    }
+
+    @PostMapping("/{id}/save")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Save a public itinerary to my plans")
+    public ResponseEntity<ItineraryResponse> saveItinerary(@PathVariable Long id) {
+        return ResponseEntity.ok(itineraryService.saveItinerary(id, getCurrentUserId()));
+    }
+
+    @DeleteMapping("/{id}/save")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Unsave a public itinerary")
+    public ResponseEntity<ItineraryResponse> unsaveItinerary(@PathVariable Long id) {
+        return ResponseEntity.ok(itineraryService.unsaveItinerary(id, getCurrentUserId()));
     }
 }

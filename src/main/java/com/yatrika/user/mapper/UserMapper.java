@@ -11,6 +11,7 @@ public interface UserMapper {
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     @Mapping(target = "fullName", expression = "java(user.getFullName())")
+    @Mapping(target = "profileImage", source = "profileImageUrl")
     @Mapping(target = "role", source = "role", defaultValue = "USER")
     UserResponse toUserResponse(User user);
 }
