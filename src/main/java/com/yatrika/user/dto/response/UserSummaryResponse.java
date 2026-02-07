@@ -7,4 +7,5 @@ public class UserSummaryResponse {
     private Long id;
     private String username;
     private String profileImageUrl;
+    private Boolean isFollowing;
 }

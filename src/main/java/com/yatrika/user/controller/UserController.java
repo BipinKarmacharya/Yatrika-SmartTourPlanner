@@ -5,6 +5,7 @@ import com.yatrika.user.domain.UserRole;
 import com.yatrika.user.dto.request.UpdateUserRequest;
 import com.yatrika.user.dto.request.UserPreferencesDTO;
 import com.yatrika.user.dto.response.UserResponse;
+import com.yatrika.user.service.CurrentUserService;
 import com.yatrika.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -28,6 +29,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final CurrentUserService currentUserService;
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or @currentUserService.getCurrentUserId() == #id")
@@ -140,6 +142,19 @@ public class UserController {
 
         UserStatsResponse response = new UserStatsResponse(totalUsers, activeUsers);
         return ResponseEntity.ok(response);
+    }
+
+    // Follow feature
+    @PostMapping("/{followingId}/follow")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(
+            summary = "Follow or Unfollow a user",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<Void> toggleFollow(@PathVariable Long followingId) {
+        Long followerId = currentUserService.getCurrentUserId();
+        userService.toggleFollow(followerId, followingId);
+        return ResponseEntity.ok().build();
     }
 
     // Inner class for stats response

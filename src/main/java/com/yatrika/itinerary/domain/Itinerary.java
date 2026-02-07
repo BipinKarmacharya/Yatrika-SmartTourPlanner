@@ -91,6 +91,18 @@ public class Itinerary extends BaseEntity {
     )
     private List<Destination> destinations = new ArrayList<>();
 
+    @OneToMany(mappedBy = "itinerary", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserLikedItinerary> likedByUsers;
+
+    @OneToMany(mappedBy = "itinerary", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SavedItinerary> savedByUsers;
+
+    @ElementCollection
+    @CollectionTable(name = "itinerary_images", joinColumns = @JoinColumn(name = "itinerary_id"))
+    @Column(name = "image_url")
+    @Builder.Default
+    private List<String> images = new ArrayList<>();
+
     // Helper to add items
     public void addItem(ItineraryItem item) {
         if (items == null) {

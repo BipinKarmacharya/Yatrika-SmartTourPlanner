@@ -22,4 +22,6 @@ public class UserResponse {
     private LocalDateTime createdAt;
     private String fullName;
     private String profileImage;
+    private Long followerCount;
+    private Long followingCount;
 }

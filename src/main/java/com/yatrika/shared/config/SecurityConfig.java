@@ -21,6 +21,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.beans.factory.annotation.Value;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,97 +46,100 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-                        // ========================
-                        // 🌍 CORS / PREFLIGHT
-                        // ========================
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                // ========================
+                                // 🌍 CORS / PREFLIGHT
+                                // ========================
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // ========================
-                        // 🌐 PUBLIC
-                        // ========================
-                        .requestMatchers(
-                                "/",
-                                "/error",
-                                "/uploads/**",
-                                "/api/auth/**",
-                                "/api/public/**",
-                                "/api/health",
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/api-docs/**"
-                        ).permitAll()
+                                // ========================
+                                // 🌐 PUBLIC
+                                // ========================
+                                .requestMatchers(
+                                        "/",
+                                        "/error",
+                                        "/uploads/**",
+                                        "/api/auth/**",
+                                        "/api/public/**",
+                                        "/api/health",
+                                        "/swagger-ui.html",
+                                        "/swagger-ui/**",
+                                        "/v3/api-docs/**",
+                                        "/api-docs/**"
+                                ).permitAll()
 
-                        // ========================
-                        // 📍 DESTINATIONS (PUBLIC READ)
-                        // ========================
-                        .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/itineraries/community").permitAll()
+                                // ========================
+                                // 📍 DESTINATIONS (PUBLIC READ)
+                                // ========================
+                                .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/itineraries/community").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/community/posts/trending").permitAll()
 
-                        .requestMatchers(HttpMethod.GET,"/api/v1/itineraries/my-plans").hasRole("USER")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/itineraries/my-plans").hasRole("USER")
 
-                        // ========================
-                        // 🛡️ ADMIN (ALL ADMIN APIs)
-                        // ========================
-                        .requestMatchers(HttpMethod.GET,"/api/v1/itineraries/admin-templates").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/itineraries/community").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/itineraries/search").permitAll()
+                                // ========================
+                                // 🛡️ ADMIN (ALL ADMIN APIs)
+                                // ========================
+                                .requestMatchers(HttpMethod.GET, "/api/v1/itineraries/admin-templates").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/itineraries/community").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/itineraries/search").permitAll()
 
 //                        .requestMatchers(HttpMethod.PATCH, "/api/v1/itineraries/**").hasRole("USER")
 
-                        .requestMatchers(
-                                "/api/v1/admin/itineraries/**",
-                                "/api/admin/**",
-                                "/api/analytics/**",
-                                "/api/moderation/**"
-                        ).hasRole("ADMIN")
+                                .requestMatchers(
+                                        "/api/v1/admin/itineraries/**",
+                                        "/api/admin/**",
+                                        "/api/analytics/**",
+                                        "/api/moderation/**"
+                                ).hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/api/destinations/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/destinations/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/destinations/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/destinations/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/destinations/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/destinations/**").hasRole("ADMIN")
 
-                        .requestMatchers("/api/uploads/destination/**").hasRole("ADMIN")
+                                .requestMatchers("/api/uploads/destination/**").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.PATCH, "/api/reviews/**/verify").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PATCH, "/api/reviews/**/verify").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
 
-                        // ========================
-                        // 👤 USER
-                        // ========================
-                        .requestMatchers(
-                                "/api/v1/itineraries",
-                                "/api/v1/itineraries/**",
-                                "/api/likes/**",
-                                "/api/bookmarks/**",
-                                "/api/profile/**"
-                        ).hasRole("USER")
+                                // ========================
+                                // 👤 USER
+                                // ========================
+                                .requestMatchers(
+                                        "/api/v1/itineraries/*/like/**"
+                                ).hasRole("USER")
+                                .requestMatchers(
+                                        "/api/v1/itineraries/**",
+                                        "/api/likes/**",
+                                        "/api/bookmarks/**",
+                                        "/api/profile/**"
+                                ).hasRole("USER")
 
-                        .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasRole("USER")
-                        .requestMatchers(HttpMethod.PUT, "/api/reviews/**").hasRole("USER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").hasRole("USER")
+                                .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasRole("USER")
+                                .requestMatchers(HttpMethod.PUT, "/api/reviews/**").hasRole("USER")
+                                .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").hasRole("USER")
 
-                        .requestMatchers(HttpMethod.POST, "/api/community/posts/**").hasRole("USER")
-                        .requestMatchers(HttpMethod.PUT, "/api/community/posts/**").hasRole("USER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/community/posts/**").hasRole("USER")
+                                .requestMatchers(HttpMethod.POST, "/api/community/posts/**").hasRole("USER")
+                                .requestMatchers(HttpMethod.PUT, "/api/community/posts/**").hasRole("USER")
+                                .requestMatchers(HttpMethod.DELETE, "/api/community/posts/**").hasRole("USER")
 
-                        .requestMatchers("/api/uploads/post/**").hasRole("USER")
-                        .requestMatchers("/api/uploads/profile/**").hasRole("USER")
+                                .requestMatchers("/api/uploads/post/**").hasRole("USER")
+                                .requestMatchers("/api/uploads/profile/**").hasRole("USER")
 
-                        // ========================
-                        // 🔐 AUTHENTICATED (ANY USER)
-                        // ========================
-                        .requestMatchers(
-                                "/api/users/**",
-                                "/api/flags/**"
-                        ).authenticated()
+                                // ========================
+                                // 🔐 AUTHENTICATED (ANY USER)
+                                // ========================
+                                .requestMatchers(
+                                        "/api/users/**",
+                                        "/api/flags/**"
+                                ).authenticated()
 
-                        .requestMatchers(HttpMethod.POST, "/api/uploads/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/uploads/**").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/uploads/**").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/uploads/**").authenticated()
 
-                        // ========================
-                        // 🔒 FALLBACK
-                        // ========================
-                        .anyRequest().authenticated()
+                                // ========================
+                                // 🔒 FALLBACK
+                                // ========================
+                                .anyRequest().authenticated()
                 )
 
                 .authenticationProvider(authenticationProvider())

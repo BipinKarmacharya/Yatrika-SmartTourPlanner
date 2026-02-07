@@ -2,11 +2,13 @@ package com.yatrika.user.service;
 
 import com.yatrika.shared.exception.AppException;
 import com.yatrika.shared.exception.ResourceNotFoundException;
+import com.yatrika.user.domain.Follow;
 import com.yatrika.user.domain.User;
 import com.yatrika.user.domain.UserRole;
 import com.yatrika.user.dto.request.UpdateUserRequest;
 import com.yatrika.user.dto.response.UserResponse;
 import com.yatrika.user.mapper.UserMapper;
+import com.yatrika.user.repository.FollowRepository;
 import com.yatrika.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final FollowRepository followRepository;
 
     public User getUserEntity(Long userId) {
         return userRepository.findById(userId)
@@ -34,7 +38,13 @@ public class UserService {
 
     public UserResponse getUserById(Long userId) {
         User user = getUserEntity(userId);
-        return userMapper.toUserResponse(user);
+        UserResponse response = userMapper.toUserResponse(user);
+
+        // Use the methods here!
+        response.setFollowerCount(followRepository.countByFollowingId(userId));
+        response.setFollowingCount(followRepository.countByFollowerId(userId));
+
+        return response;
     }
 
     @Transactional
@@ -153,5 +163,29 @@ public class UserService {
         return userRepository.findAll().stream()
                 .filter(User::getIsActive)
                 .count();
+    }
+
+    // Follow User
+    public Long getFollowerCount(Long userId) {
+        return followRepository.countByFollowingId(userId);
+    }
+
+    public Long getFollowingCount(Long userId) {
+        return followRepository.countByFollowerId(userId);
+    }
+
+
+    @Transactional
+    public void toggleFollow(Long followerId, Long followingId) {
+        if (followerId.equals(followingId)) throw new AppException("You cannot follow yourself");
+
+        Optional<Follow> existing = followRepository.findByFollowerIdAndFollowingId(followerId, followingId);
+        if (existing.isPresent()) {
+            followRepository.delete(existing.get());
+        } else {
+            User follower = getUserEntity(followerId);
+            User following = getUserEntity(followingId);
+            followRepository.save(Follow.builder().follower(follower).following(following).build());
+        }
     }
 }

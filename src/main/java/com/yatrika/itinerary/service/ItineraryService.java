@@ -12,11 +12,10 @@ import java.util.List;
 public interface ItineraryService {
 
     // -------------------- DISCOVERY --------------------
-    List<ItineraryResponse> getAdminTemplates(); // public
-    Page<ItineraryResponse> getPublicCommunityTrips(Pageable pageable); // public
-    Page<ItineraryResponse> searchPublicItineraries(ItineraryFilterRequest filter, Pageable pageable); // public
-
-    ItineraryResponse getItineraryById(Long id, Long currentUserId); // secure: only public or owned
+    List<ItineraryResponse> getAdminTemplates();
+    Page<ItineraryResponse> getPublicCommunityTrips(Pageable pageable);
+    Page<ItineraryResponse> searchPublicItineraries(ItineraryFilterRequest filter, Pageable pageable);
+    ItineraryResponse getItineraryById(Long id, Long currentUserId);
 
     // -------------------- PERSONAL MANAGEMENT --------------------
     ItineraryResponse createEmptyTrip(ItineraryRequest request, Long userId);
@@ -41,19 +40,17 @@ public interface ItineraryService {
     ItineraryResponse createAdminTemplate(ItineraryRequest request);
     ItineraryResponse updateAdminTemplate(Long templateId, ItineraryRequest request);
     void removeAdminTemplate(Long templateId);
-
     ItineraryResponse addItemToTemplate(Long templateId, ItineraryItemRequest itemRequest);
     ItineraryResponse updateTemplateItem(Long templateId, Long itemId, ItineraryItemRequest itemRequest);
     void removeItemFromTemplate(Long templateId, Long itemId);
-
     ItineraryResponse updateFullAdminTemplate(Long templateId, ItineraryRequest request);
 
-
     // -------------------- Save and Unsaved -----------------
-    public ItineraryResponse saveItinerary(Long itineraryId, Long userId);
-    public ItineraryResponse unsaveItinerary(Long itineraryId, Long userId);
+    ItineraryResponse saveItinerary(Long itineraryId, Long userId);
+    ItineraryResponse unsaveItinerary(Long itineraryId, Long userId);
+    List<ItineraryResponse> getMySavedItineraries(Long userId);
+    boolean isItinerarySaved(Long itineraryId, Long userId);
 
-    // -------------------- Like and Unlike ------------------
-    public ItineraryResponse likeItinerary(Long itineraryId, Long userId);
-    public ItineraryResponse unlikeItinerary(Long itineraryId, Long userId);
+    // -------------------- Like Toggle ------------------
+    ItineraryResponse toggleLikeItinerary(Long itineraryId, Long userId); // Changed from like/unlike to toggle
 }

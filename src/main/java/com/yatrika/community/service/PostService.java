@@ -13,6 +13,7 @@ import com.yatrika.shared.exception.AppException;
 import com.yatrika.shared.exception.ResourceNotFoundException;
 import com.yatrika.shared.service.FileStorageService;
 import com.yatrika.user.domain.User;
+import com.yatrika.user.repository.FollowRepository;
 import com.yatrika.user.service.CurrentUserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class PostService {
     private final CurrentUserService currentUserService;
     private final PostMapper postMapper;
     private final FileStorageService fileStorageService;
+    private final FollowRepository followRepository;
 
     @Transactional
     public PostResponse createPost(CreatePostRequest request) {
@@ -176,10 +178,8 @@ public class PostService {
     }
 
     public Page<PostResponse> getPublicPosts(Pageable pageable) {
-        User currentUser = currentUserService.getCurrentUserEntityOrNull();
-        Page<Post> posts = (currentUser != null)
-                ? postRepository.findByIsPublicTrueAndUserIdNot(currentUser.getId(), pageable)
-                : postRepository.findByIsPublicTrue(pageable);
+        Page<Post> posts = postRepository.findByIsPublicTrue(pageable);
+
         return posts.map(this::enrichPostResponse);
     }
 
@@ -226,14 +226,6 @@ public class PostService {
         postRepository.save(post);
     }
 
-    private PostResponse enrichPostResponse(Post post) {
-        PostResponse response = postMapper.toResponse(post);
-        User currentUser = currentUserService.getCurrentUserEntityOrNull();
-        boolean isLiked = currentUser != null && postLikeRepository.existsByPostIdAndUserId(post.getId(), currentUser.getId());
-        response.setIsLikedByCurrentUser(isLiked);
-        return response;
-    }
-
     public Long getUserPostCount(Long userId) {
         return postRepository.countByUserId(userId);
     }
@@ -256,39 +248,24 @@ public class PostService {
         return response;
     }
 
-//    private PostResponse convertToResponse(Post post) {
-//        // Better yet: Use the mapper you already have!
-//        PostResponse response = postMapper.toResponse(post);
-//
-//        // If you MUST do it manually, use .collect(Collectors.toList())
-//        if (post.getMedia() != null) {
-//            response.setMedia(post.getMedia().stream()
-//                    .map(m -> new PostMediaResponse(
-//                            m.getId(),
-//                            m.getMediaUrl(),
-//                            m.getMediaType(),
-//                            m.getCaption(),
-//                            m.getDayNumber(),
-//                            m.getDisplayOrder()
-//                    ))
-//                    .collect(Collectors.toList())); // Ensures it's a List
-//        }
-//
-//        if (post.getDays() != null) {
-//            response.setDays(post.getDays().stream()
-//                    .map(d -> new PostDayResponse(
-//                            d.getId(),
-//                            d.getDayNumber(),
-//                            d.getDescription(),
-//                            d.getActivities(),
-//                            d.getAccommodation(),
-//                            d.getFood(),
-//                            d.getTransportation()
-//                    ))
-//                    .sorted((a, b) -> a.getDayNumber().compareTo(b.getDayNumber())) // Keep days in order!
-//                    .collect(Collectors.toList()));
-//        }
-//
-//        return response;
-//    }
+    private PostResponse enrichPostResponse(Post post) {
+        PostResponse response = postMapper.toResponse(post);
+        User currentUser = currentUserService.getCurrentUserEntityOrNull();
+
+        if (currentUser != null) {
+            // 1. Check Like Status
+            boolean isLiked = postLikeRepository.existsByPostIdAndUserId(post.getId(), currentUser.getId());
+            response.setIsLikedByCurrentUser(isLiked);
+
+            // 2. Check Follow Status for the Author
+            if (response.getUser() != null) {
+                boolean isFollowing = followRepository.existsByFollowerIdAndFollowingId(
+                        currentUser.getId(),
+                        post.getUser().getId()
+                );
+                response.getUser().setIsFollowing(isFollowing);
+            }
+        }
+        return response;
+    }
 }
