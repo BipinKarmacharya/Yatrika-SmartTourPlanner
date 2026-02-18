@@ -24,5 +24,4 @@ public class ItineraryItemRequest {
     private String activityType; // VISIT, MEAL, TRANSPORT
     private BigDecimal estimatedCost;
     private Boolean isVisited;
-    private String imageUrl;
 }

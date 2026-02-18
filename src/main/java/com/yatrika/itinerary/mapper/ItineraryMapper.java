@@ -2,7 +2,6 @@ package com.yatrika.itinerary.mapper;
 
 import com.yatrika.itinerary.domain.Itinerary;
 import com.yatrika.itinerary.domain.ItineraryItem;
-import com.yatrika.itinerary.domain.UserLikedItinerary;
 import com.yatrika.itinerary.dto.response.ItineraryItemResponse;
 import com.yatrika.itinerary.dto.response.ItineraryResponse;
 import com.yatrika.itinerary.dto.response.ItinerarySummary;
@@ -19,6 +18,7 @@ import java.util.stream.Collectors;
 public abstract class ItineraryMapper {
 
     @Mapping(target = "items", source = "items")
+    @Mapping(target = "images", source = "images")
     @Mapping(target = "summary", expression = "java(calculateSummary(itinerary))")
     @Mapping(target = "user", source = "user")
     @Mapping(target = "isLikedByCurrentUser", ignore = true)

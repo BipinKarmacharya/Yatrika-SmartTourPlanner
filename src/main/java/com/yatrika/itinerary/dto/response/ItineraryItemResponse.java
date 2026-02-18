@@ -15,5 +15,6 @@ public class ItineraryItemResponse {
     private LocalTime startTime;
     private LocalTime endTime;
     private Boolean isVisited;
+    private String imageUrl;
     private DestinationSummaryDTO destination;
 }

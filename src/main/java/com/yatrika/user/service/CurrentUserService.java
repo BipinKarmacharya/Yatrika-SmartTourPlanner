@@ -7,19 +7,49 @@ import com.yatrika.user.dto.request.UpdateUserRequest;
 import com.yatrika.user.dto.response.UserResponse;
 import com.yatrika.user.mapper.UserMapper;
 import com.yatrika.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class CurrentUserService {
+public class CurrentUserService implements UserProfileService {
 
     private final UserService userService;
     private final UserMapper userMapper;
-    private final UserRepository  userRepository;
+    private final UserRepository userRepository;
+
+    @Override
+    public UserResponse getCurrentProfile() {
+        return userService.getUserById(getCurrentUserId());
+    }
+
+    @Override
+    @Transactional
+    public UserResponse updateProfile(UpdateUserRequest request) {
+        return userService.updateUser(getCurrentUserId(), request);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse updateProfileImage(MultipartFile file) {
+        // This now correctly calls the Cloudinary logic in UserService
+        return userService.updateProfileImage(getCurrentUserId(), file);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse updateInterests(List<Long> interestIds) {
+        return userService.updateUserInterests(getCurrentUserId(), interestIds);
+    }
+
+
+    // --- Helper Methods ---
 
     public Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -33,8 +63,7 @@ public class CurrentUserService {
     }
 
     public User getCurrentUserEntity() {
-        Long userId = getCurrentUserId();
-        return userService.getUserEntity(userId);
+        return userService.getUserEntity(getCurrentUserId());
     }
 
     public User getCurrentUserEntityOrNull() {
@@ -43,44 +72,23 @@ public class CurrentUserService {
         if (authentication == null ||
                 !authentication.isAuthenticated() ||
                 !(authentication.getPrincipal() instanceof UserPrincipal)) {
-            return null; // Don't throw exception for guests
+            return null;
         }
 
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         return userRepository.findById(userPrincipal.getId()).orElse(null);
     }
 
-    public UserResponse getCurrentUser() {
-        Long userId = getCurrentUserId();
-        return userService.getUserById(userId);
-    }
-
-    public UserResponse updateCurrentUser(UpdateUserRequest request) {
-        Long userId = getCurrentUserId();
-        return userService.updateUser(userId, request);
-    }
-
     public void deleteCurrentUser() {
-        Long userId = getCurrentUserId();
-        userService.deleteUser(userId);
-    }
-
-    @Transactional
-    public UserResponse updateProfileImage(String imageUrl) {
-        User user = getCurrentUserEntity();
-        user.setProfileImageUrl(imageUrl);
-        userRepository.save(user);
-        return userMapper.toUserResponse(user);
+        userService.deleteUser(getCurrentUserId());
     }
 
     public boolean isAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (authentication == null || !authentication.isAuthenticated()) {
             return false;
         }
-
         return authentication.getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
     }
 }

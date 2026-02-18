@@ -39,7 +39,4 @@ public class ItineraryItem extends BaseEntity {
     private LocalTime endTime;
     private String activityType; // VISIT, MEAL, TRANSPORT
     private Boolean isVisited = false;
-
-    @Column(name = "image_url")
-    private String imageUrl;
 }

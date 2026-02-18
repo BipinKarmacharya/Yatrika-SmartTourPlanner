@@ -22,7 +22,17 @@ public interface ItineraryRepository extends JpaRepository<Itinerary, Long>, Jpa
     List<Itinerary> findByStatusAndIsAdminCreatedTrue(ItineraryStatus status);
 
     // TAB 3: Community Shared Trips (Public & Completed)
-    Page<Itinerary> findByStatusAndIsPublicTrueAndIsAdminCreatedFalseAndSourceIdIsNull(ItineraryStatus status, Pageable pageable);
+    @Query("""
+            SELECT i FROM Itinerary i
+            WHERE i.status = :status
+              AND i.isPublic = true
+              AND (i.isAdminCreated = false OR i.isAdminCreated IS NULL)
+              AND i.sourceId IS NULL
+            """)
+    Page<Itinerary> findPublicCommunityTrips(
+            @Param("status") ItineraryStatus status,
+            Pageable pageable
+    );
 
 
     // --- USER PERSONAL MANAGEMENT ---
@@ -51,4 +61,28 @@ public interface ItineraryRepository extends JpaRepository<Itinerary, Long>, Jpa
 
     // Find all active drafts for a user (useful for a "Resume Planning" widget)
     List<Itinerary> findByUserIdAndStatus(Long userId, ItineraryStatus status);
+
+
+    // Use DISTINCT to avoid duplicate itineraries if multiple tags match
+    @Query("SELECT DISTINCT i FROM Itinerary i JOIN i.tags t " +
+            "WHERE i.isPublic = true AND t IN :tags " +
+            "ORDER BY i.likeCount DESC")
+    List<Itinerary> findPublicItinerariesByTags(@Param("tags") List<String> tags);
+
+    // Fix the popular itineraries query to use Pageable for the limit
+    // Change List<Itinerary> to Page<Itinerary>
+    @Query("SELECT i FROM Itinerary i WHERE i.isPublic = true ORDER BY i.likeCount DESC")
+    Page<Itinerary> findTopPublicItinerariesByLikes(Pageable pageable);
+
+    @Query("""
+                SELECT DISTINCT i FROM Itinerary i
+                LEFT JOIN i.tags t
+                WHERE i.isPublic = true
+                AND (
+                    UPPER(i.theme) IN :interestCodes
+                    OR UPPER(t) IN :interestCodes
+                )
+                ORDER BY i.likeCount DESC, i.copyCount DESC
+            """)
+    List<Itinerary> findRecommended(@Param("interestCodes") List<String> interestCodes, Pageable pageable);
 }

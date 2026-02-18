@@ -98,7 +98,10 @@ public class Itinerary extends BaseEntity {
     private List<SavedItinerary> savedByUsers;
 
     @ElementCollection
-    @CollectionTable(name = "itinerary_images", joinColumns = @JoinColumn(name = "itinerary_id"))
+    @CollectionTable(
+            name = "itinerary_images",
+            joinColumns = @JoinColumn(name = "itinerary_id")
+    )
     @Column(name = "image_url")
     @Builder.Default
     private List<String> images = new ArrayList<>();

@@ -10,10 +10,13 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 public interface DestinationRepository extends JpaRepository<Destination, Long> {
 
     // Basic queries
+    Optional<Destination> findByNameIgnoreCase(String name);
+
     List<Destination> findByDistrict(String district);
 
     List<Destination> findByProvince(String province);

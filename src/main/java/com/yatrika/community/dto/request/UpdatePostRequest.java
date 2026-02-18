@@ -9,6 +9,7 @@ import java.util.List;
 public class UpdatePostRequest {
     private String title;
     private String content;
+    private String destination;
     private String coverImageUrl;
     private Boolean isPublic;
     private Integer tripDurationDays;

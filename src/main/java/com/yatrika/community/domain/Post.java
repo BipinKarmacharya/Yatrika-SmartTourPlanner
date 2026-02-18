@@ -63,8 +63,9 @@ public class Post extends BaseEntity {
     // Relationships
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 20)
+    @OrderBy("displayOrder ASC") // Add this so the gallery stays organized
     @Builder.Default
-    private Set<PostMedia> media = new HashSet<>();
+    private List<PostMedia> media = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 20)
@@ -74,7 +75,10 @@ public class Post extends BaseEntity {
 
     // Helper methods
     public void addMedia(PostMedia mediaItem) {
-        media.add(mediaItem);
+        if (this.media == null) {
+            this.media = new ArrayList<>();
+        }
+        this.media.add(mediaItem);
         mediaItem.setPost(this);
     }
 

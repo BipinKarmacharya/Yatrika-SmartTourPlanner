@@ -11,7 +11,7 @@ import com.yatrika.destination.mapper.DestinationMapper;
 import com.yatrika.destination.repository.DestinationRepository;
 import com.yatrika.shared.exception.AppException;
 import com.yatrika.shared.exception.ResourceNotFoundException;
-import com.yatrika.shared.service.FileStorageService;
+import com.yatrika.shared.service.impl.LocalStorageServiceImpl;
 import com.yatrika.user.domain.User;
 import com.yatrika.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -20,9 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -35,7 +33,7 @@ public class DestinationService {
 
     private final DestinationRepository destinationRepository;
     private final DestinationMapper destinationMapper;
-    private final FileStorageService fileStorageService;
+    private final LocalStorageServiceImpl fileStorageService;
     private final UserRepository userRepository;
 
     /**
@@ -189,6 +187,12 @@ public class DestinationService {
         return destinationRepository.findAll(pageable).map(destinationMapper::toResponse);
     }
 
+    public DestinationResponse getDestinationByName(String name) {
+        return destinationRepository.findByNameIgnoreCase(name)
+                .map(destinationMapper::toResponse)
+                .orElseThrow(() -> new ResourceNotFoundException("Destination", "name", name));
+    }
+
 
     public Page<DestinationResponse> getRecommendationsForUser(Long userId, Pageable pageable) {
         log.info("Fetching recommendations for user ID: {}", userId);
@@ -196,27 +200,28 @@ public class DestinationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        List<String> interests = user.getInterests();
+        List<String> interestCodes = user.getUserInterests()
+                .stream()
+                .map(ui -> ui.getInterest().getCode())
+                .toList();
 
-        Page<Destination> destinations;
-
-        // 1. Logic: If user has no interests, show them popular destinations instead
-        if (interests == null || interests.isEmpty()) {
-            log.debug("User has no explicit interests, falling back to popular destinations.");
-            return getPopularDestinations(pageable);
-        } else {
-            // 2. Query: Find destinations where tags overlap with user interests
-            destinations = destinationRepository.findRecommendedDestinations(
-                    interests.toArray(new String[0]),
-                    10, // Limit to top 10 matches
-                    pageable
-            );
+        // Fallback for users with no interests
+        if (interestCodes.isEmpty()) {
+            log.debug("User has no interests, falling back to popular destinations.");
+            return getPopularDestinations(pageable); // Already returns Page<DestinationResponse>
         }
 
-        // 3. Mapping: Convert the Page of Database Entities to a Page of Response DTOs
-        // We use destinationMapper::toResponse which is already injected in your class
+        // Fetch recommended destinations
+        Page<Destination> destinations = destinationRepository.findRecommendedDestinations(
+                interestCodes.toArray(new String[0]),
+                10, // limit
+                pageable
+        );
+
+        // Map entities to response DTOs
         return destinations.map(destinationMapper::toResponse);
     }
+
 
     // ... searchDestinations, findNearbyDestinations, etc. follow the same pattern ...
     // --- Advanced Search and Filtering ---

@@ -9,9 +9,13 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin/itineraries")
@@ -33,6 +37,23 @@ public class AdminItineraryController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(itineraryService.createAdminTemplate(request));
     }
+
+    @PostMapping(
+            value = "/with-images",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    @Operation(
+            summary = "Create admin template with images (one-step)",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<ItineraryResponse> createTemplateWithImages(
+            @RequestPart("data") ItineraryRequest request,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(itineraryService.createAdminTemplate(request, files));
+    }
+
 
     @PutMapping("/{id}")
     @Operation(
@@ -57,6 +78,18 @@ public class AdminItineraryController {
 
         itineraryService.removeAdminTemplate(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(
+            value = "/{id}/images",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    public ItineraryResponse uploadAdminTemplateImages(
+            @PathVariable Long id,
+            @RequestPart("files") List<MultipartFile> files
+    ) {
+        return itineraryService.uploadAdminTemplateImages(id, files);
     }
 
 
@@ -101,15 +134,14 @@ public class AdminItineraryController {
 
     // ================= BULK REPLACE (OPTIONAL) =================
 
-    @PutMapping("/{id}/full")
-    @Operation(summary = "Replace entire admin template")
-    public ResponseEntity<ItineraryResponse> replaceFullTemplate(
-            @PathVariable Long id,
-            @RequestBody ItineraryRequest request) {
-
-        return ResponseEntity.ok(
-                itineraryService.updateFullAdminTemplate(id, request)
-        );
-    }
-
+//    @PutMapping("/{id}/full")
+//    @Operation(summary = "Replace entire admin template")
+//    public ResponseEntity<ItineraryResponse> replaceFullTemplate(
+//            @PathVariable Long id,
+//            @RequestBody ItineraryRequest request) {
+//
+//        return ResponseEntity.ok(
+//                itineraryService.updateFullAdminTemplate(id, request)
+//        );
+//    }
 }
