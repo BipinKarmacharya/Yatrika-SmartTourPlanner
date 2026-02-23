@@ -1,5 +1,6 @@
 package com.yatrika.itinerary.dto.request;
 
+import com.yatrika.itinerary.domain.ActivityType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -21,7 +22,7 @@ public class ItineraryItemRequest {
     private String notes;
     private LocalTime startTime;
     private LocalTime endTime;
-    private String activityType; // VISIT, MEAL, TRANSPORT
+    private ActivityType activityType; // VISIT, MEAL, TRANSPORT
     private BigDecimal estimatedCost;
     private Boolean isVisited;
 }

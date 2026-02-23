@@ -145,6 +145,14 @@ public class ItineraryController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/my-plans/all")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Delete all personal itineraries for the current user", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<Void> deleteAllMyItineraries() {
+        itineraryService.deleteAllMyItineraries(getCurrentUserId());
+        return ResponseEntity.noContent().build();
+    }
+
     // ================= STEP 4: ITEM & PROGRESS MANAGEMENT =================
 
     @PostMapping("/{itineraryId}/items")
@@ -165,18 +173,6 @@ public class ItineraryController {
             @RequestBody ItineraryItemRequest request) {
         return ResponseEntity.ok(itineraryService.updateItem(itineraryId, itemId, request, getCurrentUserId()));
     }
-
-//    @PutMapping("/{id}/full")
-//    @PreAuthorize("hasRole('USER')")
-//    @Operation(
-//            summary = "⚠️ Replace entire itinerary (send ALL items)",
-//            description = "This endpoint replaces all existing items. Use only for bulk updates."
-//    )
-//    public ResponseEntity<ItineraryResponse> updateFullItinerary(
-//            @PathVariable Long id,
-//            @RequestBody ItineraryRequest request) {
-//        return ResponseEntity.ok(itineraryService.updateFullItinerary(id, request, getCurrentUserId()));
-//    }
 
     @PatchMapping("/{itineraryId}/items/{itemId}/toggle-visited")
     @PreAuthorize("hasRole('USER')")

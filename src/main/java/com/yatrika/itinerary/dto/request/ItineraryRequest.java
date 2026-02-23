@@ -17,6 +17,5 @@ public class ItineraryRequest {
     private LocalDate startDate;
     private LocalDate endDate;
     private BigDecimal estimatedBudget;
-    private List<String> images;
-//    private List<ItineraryItemRequest> items;
+    private List<ItineraryImageRequest> images;
 }

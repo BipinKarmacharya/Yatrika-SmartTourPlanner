@@ -1,5 +1,6 @@
 package com.yatrika.recommendation.dto;
 
+import com.yatrika.itinerary.dto.response.ItineraryImageResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,5 +23,5 @@ public class ItineraryRecommendationResponse {
     private Double averageRating;
     private Integer likeCount;
     private Integer copyCount;
-    private List<String> images; // first image as cover
+    private List<ItineraryImageResponse> images;// first image as cover
 }

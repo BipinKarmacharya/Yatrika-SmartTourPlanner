@@ -31,7 +31,7 @@ public class ItineraryResponse {
     private Boolean isSavedByCurrentUser;
     private String countryCode;
     private List<String> tags;
-    private List<String> images;
+    private List<ItineraryImageResponse> images;
     private List<ItineraryItemResponse> items;
     private ItinerarySummary summary;
     private UserResponse user;

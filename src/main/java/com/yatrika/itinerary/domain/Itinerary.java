@@ -97,23 +97,61 @@ public class Itinerary extends BaseEntity {
     @OneToMany(mappedBy = "itinerary", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SavedItinerary> savedByUsers;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "itinerary_images",
-            joinColumns = @JoinColumn(name = "itinerary_id")
+    @OneToMany(
+            mappedBy = "itinerary",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
-    @Column(name = "image_url")
+    @OrderBy("sortOrder ASC")
     @Builder.Default
-    private List<String> images = new ArrayList<>();
+    private List<ItineraryImage> images = new ArrayList<>();
 
     // Helper to add items
+
     public void addItem(ItineraryItem item) {
-        if (items == null) {
-            items = new ArrayList<>();
-        }
+        if (item == null) return;
         items.add(item);
         item.setItinerary(this);
     }
+
+    public void removeItem(ItineraryItem item) {
+        if (item == null) return;
+        items.remove(item);
+        item.setItinerary(null);
+    }
+
+    public void addImage(ItineraryImage image) {
+        if (image == null) return;
+
+        images.add(image);
+        image.setItinerary(this);
+
+        if (image.getSortOrder() == null) {
+            image.setSortOrder(images.size());
+        }
+    }
+
+    public void removeImage(ItineraryImage image) {
+        if (image == null) return;
+
+        images.remove(image);
+        image.setItinerary(null);
+
+        // Re-normalize order
+        for (int i = 0; i < images.size(); i++) {
+            images.get(i).setSortOrder(i + 1);
+        }
+    }
+
+    public void setCoverImage(ItineraryImage cover) {
+        if (cover == null || !images.contains(cover)) {
+            throw new IllegalArgumentException("Image does not belong to this itinerary");
+        }
+
+        images.forEach(img -> img.setIsCover(false));
+        cover.setIsCover(true);
+    }
+
 
     // HELPER METHOD to calculate estimated budget from items
     public BigDecimal calculateEstimatedBudget() {

@@ -2,6 +2,7 @@ package com.yatrika.interest.service;
 
 import com.yatrika.interest.domain.Interest;
 import com.yatrika.interest.domain.UserInterest;
+import com.yatrika.interest.dto.request.InterestRequest;
 import com.yatrika.interest.repository.InterestRepository;
 import com.yatrika.interest.repository.UserInterestRepository;
 import com.yatrika.shared.exception.AppException;
@@ -46,6 +47,38 @@ public class InterestService {
                             .build()
             );
         }
+    }
+
+    public Interest createInterest(InterestRequest request) {
+        if (interestRepository.findByCode(request.getCode().toUpperCase()).isPresent()) {
+            throw new AppException("Interest code already exists");
+        }
+
+        Interest interest = Interest.builder()
+                .code(request.getCode().toUpperCase())
+                .name(request.getName())
+                .icon(request.getIcon())
+                .active(request.getActive() != null ? request.getActive() : true)
+                .build();
+
+        return interestRepository.save(interest);
+    }
+
+    public Interest updateInterest(Long id, InterestRequest request) {
+        Interest interest = interestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Interest", "id", id));
+
+        interest.setName(request.getName());
+        interest.setIcon(request.getIcon());
+        if (request.getActive() != null) interest.setActive(request.getActive());
+
+        return interestRepository.save(interest);
+    }
+
+    public void deleteInterest(Long id) {
+        Interest interest = interestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Interest", "id", id));
+        interestRepository.delete(interest);
     }
 }
 

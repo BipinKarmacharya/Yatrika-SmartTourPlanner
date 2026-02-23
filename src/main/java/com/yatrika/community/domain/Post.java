@@ -82,6 +82,13 @@ public class Post extends BaseEntity {
         mediaItem.setPost(this);
     }
 
+    public void removeMedia(PostMedia media) {
+        if (this.media != null) {
+            this.media.remove(media);
+            media.setPost(null); // Break the relationship
+        }
+    }
+
     public void addDay(PostDay day) {
         days.add(day);
         day.setPost(this);

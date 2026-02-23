@@ -176,7 +176,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,
                                 "/api/destinations/**",
                                 "/api/v1/itineraries/admin-templates",
-                                "/api/v1/itineraries/{id}"
+                                "/api/v1/itineraries/{id}",
+                                "/api/community/posts/public",
+                                "/api/reviews/destination/{destinationId}",
+                                "/api/v1/debug/notifications/trigger-reminders"
                         ).permitAll()
 
                         // USER - Profile and user operations

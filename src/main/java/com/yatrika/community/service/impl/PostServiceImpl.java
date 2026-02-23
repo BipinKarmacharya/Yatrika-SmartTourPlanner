@@ -2,6 +2,7 @@ package com.yatrika.community.service.impl;
 
 import com.yatrika.community.domain.*;
 import com.yatrika.community.dto.request.CreatePostRequest;
+import com.yatrika.community.dto.request.PostMediaRequest;
 import com.yatrika.community.dto.request.UpdatePostRequest;
 import com.yatrika.community.dto.response.PostResponse;
 import com.yatrika.community.mapper.PostMapper;
@@ -22,9 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -87,7 +87,25 @@ public class PostServiceImpl implements PostService {
 
         validateOwnership(post);
 
-        // 2. Add new images if provided
+        // --- LOGIC TO DELETE REMOVED IMAGES ---
+        // Inside updatePost method
+        if (request.getMedia() != null) {
+            Set<String> urlsToKeep = request.getMedia().stream()
+                    .map(PostMediaRequest::getMediaUrl)
+                    .collect(Collectors.toSet());
+
+            // Use an Iterator to safely remove items while looping
+            Iterator<PostMedia> iterator = post.getMedia().iterator();
+            while (iterator.hasNext()) {
+                PostMedia existingMedia = iterator.next();
+                if (!urlsToKeep.contains(existingMedia.getMediaUrl())) {
+                    // Optional: call cloudinary delete here
+                    iterator.remove(); // This is like calling post.removeMedia
+                }
+            }
+        }
+
+        // --- LOGIC TO ADD NEW IMAGES ---
         if (imageFiles != null && !imageFiles.isEmpty()) {
             for (MultipartFile file : imageFiles) {
                 String url = cloudinaryStorageService.uploadFile(file, "community_posts");
@@ -98,7 +116,14 @@ public class PostServiceImpl implements PostService {
             }
         }
 
+        // Update other fields
         updateBasicFields(post, request);
+
+        // Ensure a cover image always exists if the old one was deleted
+        if (!post.getMedia().isEmpty() && (post.getCoverImageUrl() == null || !post.getMedia().stream().anyMatch(m -> m.getMediaUrl().equals(post.getCoverImageUrl())))) {
+            post.setCoverImageUrl(post.getMedia().get(0).getMediaUrl());
+        }
+
         return enrichPostResponse(postRepository.save(post));
     }
 

@@ -1,5 +1,6 @@
 package com.yatrika.itinerary.mapper;
 
+import com.yatrika.itinerary.domain.ActivityType;
 import com.yatrika.itinerary.domain.Itinerary;
 import com.yatrika.itinerary.domain.ItineraryItem;
 import com.yatrika.itinerary.dto.response.ItineraryItemResponse;
@@ -75,11 +76,14 @@ public abstract class ItineraryMapper {
                     .count();
             summary.setCompletedActivities(completed);
 
-            Map<String, Long> breakdown = itinerary.getItems().stream()
+            Map<ActivityType, Long> breakdown = itinerary.getItems().stream()
                     .collect(Collectors.groupingBy(
-                            item -> item.getActivityType() != null ? item.getActivityType() : "OTHER",
+                            item -> item.getActivityType() != null
+                                    ? item.getActivityType()
+                                    : ActivityType.GENERAL,
                             Collectors.counting()
                     ));
+
             summary.setActivityTypeBreakdown(breakdown);
         }
 

@@ -69,6 +69,35 @@ public class AdminItineraryController {
         );
     }
 
+    @DeleteMapping("/{id}/images/{imageId}")
+    @Operation(
+            summary = "Delete admin itinerary image",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<ItineraryResponse> deleteImage(
+            @PathVariable Long id,
+            @PathVariable Long imageId
+    ) {
+        return ResponseEntity.ok(
+                itineraryService.removeAdminTemplateImage(id, imageId)
+        );
+    }
+
+    @PutMapping("/{id}/images/{imageId}/cover")
+    @Operation(
+            summary = "Set cover image for admin itinerary",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<ItineraryResponse> setCoverImage(
+            @PathVariable Long id,
+            @PathVariable Long imageId
+    ) {
+        return ResponseEntity.ok(
+                itineraryService.setAdminTemplateCoverImage(id, imageId)
+        );
+    }
+
+
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Delete admin template",
@@ -131,17 +160,4 @@ public class AdminItineraryController {
         itineraryService.removeItemFromTemplate(id, itemId);
         return ResponseEntity.noContent().build();
     }
-
-    // ================= BULK REPLACE (OPTIONAL) =================
-
-//    @PutMapping("/{id}/full")
-//    @Operation(summary = "Replace entire admin template")
-//    public ResponseEntity<ItineraryResponse> replaceFullTemplate(
-//            @PathVariable Long id,
-//            @RequestBody ItineraryRequest request) {
-//
-//        return ResponseEntity.ok(
-//                itineraryService.updateFullAdminTemplate(id, request)
-//        );
-//    }
 }

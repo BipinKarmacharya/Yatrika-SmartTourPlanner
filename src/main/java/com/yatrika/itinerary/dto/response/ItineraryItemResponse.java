@@ -1,6 +1,7 @@
 package com.yatrika.itinerary.dto.response;
 
 import com.yatrika.destination.dto.response.DestinationSummaryDTO;
+import com.yatrika.itinerary.domain.ActivityType;
 import lombok.Data;
 import java.time.LocalTime;
 
@@ -11,7 +12,7 @@ public class ItineraryItemResponse {
     private Integer orderInDay;
     private String title;
     private String notes;
-    private String activityType;
+    private ActivityType activityType;
     private LocalTime startTime;
     private LocalTime endTime;
     private Boolean isVisited;
