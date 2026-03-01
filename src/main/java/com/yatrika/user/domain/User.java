@@ -71,6 +71,14 @@ public class User extends BaseEntity {
 
     @Column(name = "deactivation_reason")
     private String deactivationReason;
+
+    @Column(name = "reset_token")
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    private LocalDateTime resetTokenExpiry;
+
+
     // Helper methods
     public String getFullName() {
         return (firstName != null ? firstName + " " : "") +

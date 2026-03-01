@@ -165,7 +165,8 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api-docs/**"
+                                "/api-docs/**",
+                                "/api/community/posts/trending"
                         ).permitAll()
 
                         // AUTH
@@ -179,7 +180,9 @@ public class SecurityConfig {
                                 "/api/v1/itineraries/{id}",
                                 "/api/community/posts/public",
                                 "/api/reviews/destination/{destinationId}",
-                                "/api/v1/debug/notifications/trigger-reminders"
+                                "/api/v1/debug/notifications/trigger-reminders",
+                                "/api/v1/subscriptions/payment-callback",
+                                "/api/v1/recommendations/**"
                         ).permitAll()
 
                         // USER - Profile and user operations
@@ -190,9 +193,16 @@ public class SecurityConfig {
                         ).hasRole("USER")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/{id}").authenticated()  // Self or admin
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/users/{id}/password").authenticated()  // Self only
-
+                        .requestMatchers(HttpMethod.GET, "/api/v1/itineraries/recommended").permitAll()
                         // ITINERARIES & RECOMMENDATIONS
-                        .requestMatchers("/api/v1/itineraries/**", "/api/v1/recommendations/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/itineraries/{id}/reviews").hasRole("USER")
+                        .requestMatchers(
+                                "/api/v1/itineraries/**",
+                                "/api/v1/recommendations/**",
+                                "/api/v1/subscriptions/initiate-upgrade",
+                                "/api/v1/subscriptions/verify",
+                                "/api/posts/{postId}/comments/**"
+                        ).hasRole("USER")
 
                         // ADMIN - User management
                         .requestMatchers(

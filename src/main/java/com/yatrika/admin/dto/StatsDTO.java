@@ -18,4 +18,5 @@ public class StatsDTO {
     private long postCount;
     private long reviewCount;
     private long pendingFlags;
+    private double totalRevenue;
 }

@@ -5,5 +5,8 @@ public enum ActivityType {
     GENERAL,
     TRAVEL,
     TREK,
+    ACCOMMODATION,
+    RELIGIOUS,
+    CULTURAL,
     OTHER
 }

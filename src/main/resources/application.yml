@@ -24,6 +24,21 @@ spring:
         order_inserts: true
         order_updates: true
         default_batch_fetch_size: 20
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+#    username: ${MAIL_USERNAME}
+#    password: ${MAIL_PASSWORD}
+    username: nepstudy02@gmail.com
+    password: mmwq vwuh wmzv heut
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 server:
   port: ${PORT:8080}
   forward-headers-strategy: framework
@@ -36,6 +51,11 @@ yatrika:
     base-url: https://api.openweathermap.org/data/2.5
   firebase:
     config-path: ${FIREBASE_CONFIG_PATH:classpath:firebase-service-account.json}
+
+khalti:
+  api:
+    secret-key: 58d43b1d80424901bfd906046e7ff7f2
+
 
 # You can also add specific logging for your new services here
 logging:

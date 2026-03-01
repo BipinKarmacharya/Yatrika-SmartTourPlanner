@@ -7,6 +7,8 @@ import com.yatrika.ml.dto.request.MLSaveRequest;
 import com.yatrika.ml.dto.response.MLPredictResponse;
 import com.yatrika.ml.service.MLItineraryService;
 import com.yatrika.shared.security.UserPrincipal;
+import com.yatrika.subscription.service.SubscriptionService;
+import com.yatrika.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,19 +27,30 @@ public class MLController {
 
     private final MLItineraryService mlItineraryService;
     private final ItineraryMapper itineraryMapper;
+    private final SubscriptionService subscriptionService; // New dependency
+    private final com.yatrika.user.repository.UserRepository userRepository; // To fetch User entity from ID
 
-    /**
-     * Fetch ML itinerary preview from FastAPI.
-     * Returns structured response (MLPredictResponse) for frontend consumption.
-     */
     @PostMapping("/predict")
     @PreAuthorize("hasRole('USER')")
     @Operation(
             summary = "Get AI itinerary preview (FastAPI bridge)",
             security = @SecurityRequirement(name = "bearerAuth")
     )
-    public ResponseEntity<MLPredictResponse> getPreview(@Valid @RequestBody MLPredictRequest request) {
-        MLPredictResponse response = mlItineraryService.getPredictionFromFastAPI(request);
+    public ResponseEntity<MLPredictResponse> getPreview(
+            @Valid @RequestBody MLPredictRequest request,
+            @AuthenticationPrincipal UserPrincipal principal) {
+
+        // 1. Fetch full User entity
+        User user = userRepository.findById(principal.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 2. Subscription gatekeeper
+        subscriptionService.validateAndTrackUsage(user.getId());
+
+        // 3. Call FastAPI
+        MLPredictResponse response =
+                mlItineraryService.getPredictionFromFastAPI(request);
+
         return ResponseEntity.ok(response);
     }
 

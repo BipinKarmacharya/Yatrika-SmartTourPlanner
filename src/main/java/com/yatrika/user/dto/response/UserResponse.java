@@ -29,4 +29,5 @@ public class UserResponse {
     private Long followerCount;
     private Long followingCount;
     private List<InterestResponse> interests;
+    private String tier;
 }

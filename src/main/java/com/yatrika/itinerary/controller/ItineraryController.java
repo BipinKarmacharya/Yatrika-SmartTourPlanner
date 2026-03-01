@@ -68,18 +68,27 @@ public class ItineraryController {
     }
 
     @GetMapping("/recommended")
-    @PreAuthorize("hasRole('USER')")
-    @Operation(summary = "Get recommended itineraries for current user",
+    @Operation(summary = "Get recommended itineraries (Personalized or General)",
             security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<List<ItineraryRecommendationResponse>> getRecommended() {
-        UserPrincipal principal = (UserPrincipal) SecurityContextHolder.getContext()
-                .getAuthentication().getPrincipal();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // 1. Check if the user is a Guest (Anonymous)
+        if (authentication == null ||
+                !authentication.isAuthenticated() ||
+                authentication.getPrincipal() instanceof String) {
+
+            // Return general/popular itineraries for guests so the app doesn't crash
+            return ResponseEntity.ok(itineraryRecommendationService.getGeneralRecommendations());
+        }
+
+        // 2. If we reached here, the user is logged in
         User user = currentUserService.getCurrentUserEntity();
         List<ItineraryRecommendationResponse> recommended =
                 itineraryRecommendationService.recommendForUser(user);
+
         return ResponseEntity.ok(recommended);
     }
-
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")

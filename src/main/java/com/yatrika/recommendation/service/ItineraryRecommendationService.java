@@ -54,4 +54,11 @@ public class ItineraryRecommendationService {
 
         return mapper.toResponse(recommendedList);
     }
+
+    public List<ItineraryRecommendationResponse> getGeneralRecommendations() {
+        Pageable topTen = PageRequest.of(0, 10);
+        // Directly fetch the most liked itineraries for guests
+        List<Itinerary> popular = itineraryRepository.findTopPublicItinerariesByLikes(topTen).getContent();
+        return mapper.toResponse(popular);
+    }
 }

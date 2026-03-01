@@ -17,6 +17,7 @@ import java.util.List;
 public interface PostMapper {
 
     @Mapping(target = "user", source = "post.user")
+    @Mapping(target = "totalComments", source = "post.totalComments")
     @Mapping(target = "isLikedByCurrentUser", ignore = true)
     PostResponse toResponse(Post post);
 

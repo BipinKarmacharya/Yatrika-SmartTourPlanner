@@ -4,6 +4,7 @@ import com.yatrika.interest.domain.Interest;
 import com.yatrika.interest.domain.UserInterest;
 import com.yatrika.interest.dto.response.InterestResponse;
 import com.yatrika.interest.mapper.InterestMapper;
+import com.yatrika.subscription.domain.Subscription;
 import com.yatrika.user.domain.User;
 import com.yatrika.user.dto.response.UserResponse;
 import org.mapstruct.Mapper;
@@ -14,13 +15,16 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {InterestMapper.class})
 public interface UserMapper {
 
+    @Mapping(target = "id", source = "user.id")
+    @Mapping(target = "createdAt", source = "user.createdAt")
     @Mapping(target = "fullName", expression = "java(user.getFullName())")
-    @Mapping(target = "profileImage", source = "profileImageUrl")
-    @Mapping(target = "role", source = "role", defaultValue = "USER")
+    @Mapping(target = "profileImage", source = "user.profileImageUrl")
+    @Mapping(target = "role", source = "user.role", defaultValue = "USER")
+    @Mapping(target = "tier", source = "subscription.tier")
     @Mapping(target = "followerCount", ignore = true)
     @Mapping(target = "followingCount", ignore = true)
-    @Mapping(target = "interests", source = "userInterests") // This points to the mapping below
-    UserResponse toUserResponse(User user);
+    @Mapping(target = "interests", source = "user.userInterests")
+    UserResponse toUserResponse(User user, Subscription subscription);
 
     // ✅ MapStruct will automatically use this for each item in the list
     // It extracts the Interest entity from the UserInterest link table
