@@ -47,6 +47,7 @@ public interface DestinationMapper {
     @Mapping(target = "freeEntry", expression = "java(destination.isFreeEntry())")
     @Mapping(target = "latitude", source = "latitude")
     @Mapping(target = "longitude", source = "longitude")
+    @Mapping(target = "bestSeason", expression = "java(destination.getBestSeason() != null ? destination.getBestSeason() : \"All Year\")")
     DestinationResponse toResponse(Destination destination);
 
     DestinationResponse.DestinationImageResponse toImageResponse(DestinationImage image);

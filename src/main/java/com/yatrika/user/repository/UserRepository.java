@@ -52,4 +52,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "WHERE u.createdAt >= :startDate GROUP BY FUNCTION('DATE', u.createdAt) ORDER BY date")
 
     List<Object[]> countNewUsersPerDay(@Param("startDate") LocalDate startDate);
+
+    Optional<User> findByResetToken(String resetToken);
 }

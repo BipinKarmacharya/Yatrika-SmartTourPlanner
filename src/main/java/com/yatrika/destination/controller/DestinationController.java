@@ -51,6 +51,12 @@ public class DestinationController {
         return ResponseEntity.ok(destinationService.getAllDestinations(pageable));
     }
 
+    @GetMapping("/by-name")
+    @Operation(summary = "Get destination by its exact name (Public)")
+    public ResponseEntity<DestinationResponse> getByName(@RequestParam String name) {
+        return ResponseEntity.ok(destinationService.getDestinationByName(name));
+    }
+
     @GetMapping("/search")
     @Operation(summary = "Search destinations with filters (Public)")
     public ResponseEntity<Page<DestinationResponse>> searchDestinations(

@@ -70,7 +70,8 @@ public class Destination extends BaseEntity {
     @Column(length = 100)
     private String subCategory;
 
-    private String bestSeason;
+    @Builder.Default
+    private String bestSeason = "All Year";
 
     @Column(name = "best_time_of_day")
     private String bestTimeOfDay;

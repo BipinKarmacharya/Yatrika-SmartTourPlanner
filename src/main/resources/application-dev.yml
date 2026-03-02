@@ -28,3 +28,9 @@ logging:
   level:
     com.yatrika: DEBUG
     org.hibernate.SQL: DEBUG
+
+# Add to application-dev.yml
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:dh23gnotg}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}

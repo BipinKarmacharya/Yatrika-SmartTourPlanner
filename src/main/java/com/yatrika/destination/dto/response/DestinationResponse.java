@@ -22,6 +22,7 @@ public class DestinationResponse {
     private BigDecimal longitude;
     private DestinationType type;
     private String category;
+    private String bestSeason;
     private DifficultyLevel difficultyLevel;
     private Integer averageDurationHours;
     private BigDecimal entranceFeeLocal;

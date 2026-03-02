@@ -16,34 +16,32 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
 
+    // Efficiently fetch user details with the post to avoid N+1 issues in lists
+    @EntityGraph(attributePaths = {"user"})
     Page<Post> findByUserId(Long userId, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"user"})
     Page<Post> findByIsPublicTrue(Pageable pageable);
 
-    Page<Post> findByIsPublicTrueAndUserIdNot(Long excludedUserId, Pageable pageable);
-
-    @Query("SELECT p FROM Post p WHERE " +
-            "LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+    @Query("SELECT p FROM Post p WHERE p.isPublic = true AND " +
+            "(LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
             "LOWER(p.destination) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-            "LOWER(p.content) LIKE LOWER(CONCAT('%', :query, '%'))")
+            "LOWER(p.content) LIKE LOWER(CONCAT('%', :query, '%')))")
     Page<Post> searchByKeyword(@Param("query") String query, Pageable pageable);
 
-    @Query("SELECT p FROM Post p WHERE p.isPublic = true ORDER BY p.totalLikes DESC")
+    // Optimized trending: Likes + Views weight
+    @Query("SELECT p FROM Post p WHERE p.isPublic = true ORDER BY (p.totalLikes * 2 + p.totalViews) DESC")
     Page<Post> findTrendingPosts(Pageable pageable);
 
-    // Keep EntityGraph for single lookups (not Pageable), it's very efficient here
+    // Critical for Single Post View: Fetch everything in one go
     @EntityGraph(attributePaths = {"user", "media", "tags", "days"})
     Optional<Post> findById(Long id);
 
-    // --- Standard Analytics Queries ---
+    // Simplified standard derived query
+    long countByUserId(Long userId);
 
-    boolean existsByIdAndUserId(Long postId, Long userId);
-
-    @Query("SELECT COUNT(p) FROM Post p WHERE p.user.id = :userId")
-    Long countByUserId(@Param("userId") Long userId);
-
-    @Query("SELECT COUNT(p) FROM Post p WHERE p.createdAt >= :startDate AND p.createdAt <= :endDate")
-    Long countByCreatedAtBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+    @Query("SELECT COUNT(p) FROM Post p WHERE p.createdAt BETWEEN :startDate AND :endDate")
+    long countByCreatedAtBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
     @Query("SELECT FUNCTION('HOUR', p.createdAt) as hour, COUNT(p) as count FROM Post p " +
             "WHERE p.createdAt >= :startDate GROUP BY FUNCTION('HOUR', p.createdAt) ORDER BY hour")

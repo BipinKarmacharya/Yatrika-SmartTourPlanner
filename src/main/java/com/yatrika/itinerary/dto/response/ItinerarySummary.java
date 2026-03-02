@@ -1,5 +1,6 @@
 package com.yatrika.itinerary.dto.response;
 
+import com.yatrika.itinerary.domain.ActivityType;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -10,5 +11,5 @@ public class ItinerarySummary {
     private BigDecimal totalEstimatedBudget;
     private long activityCount;
     private long completedActivities;
-    private Map<String, Long> activityTypeBreakdown;
+    private Map<ActivityType, Long> activityTypeBreakdown;
 }

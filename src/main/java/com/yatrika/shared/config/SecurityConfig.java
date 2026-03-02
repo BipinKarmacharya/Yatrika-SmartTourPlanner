@@ -21,6 +21,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.beans.factory.annotation.Value;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,102 +39,187 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        http
+//                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+//                .csrf(csrf -> csrf.disable())
+//                .sessionManagement(session -> session
+//                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .authorizeHttpRequests(auth -> auth
+//
+//                                // ========================
+//                                // 🌍 CORS / PREFLIGHT
+//                                // ========================
+//                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+//
+//                                // ========================
+//                                // 🌐 PUBLIC
+//                                // ========================
+//                                .requestMatchers(
+//                                        "/",
+//                                        "/error",
+//                                        "/uploads/**",
+//                                        "/api/v1/auth/**",
+//                                        "/api/public/**",
+//                                        "/api/health",
+//                                        "/swagger-ui.html",
+//                                        "/swagger-ui/**",
+//                                        "/v3/api-docs/**",
+//                                        "/api-docs/**"
+//                                ).permitAll()
+//
+//                                // ========================
+//                                // 📍 DESTINATIONS (PUBLIC READ)
+//                                // ========================
+//                                .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
+//                                .requestMatchers(HttpMethod.GET, "/api/v1/itineraries/community").permitAll()
+//                                .requestMatchers(HttpMethod.GET, "/api/community/posts/trending").permitAll()
+//
+//                                .requestMatchers(HttpMethod.GET, "/api/v1/itineraries/my-plans").hasRole("USER")
+//
+//                                // ========================
+//                                // 🛡️ ADMIN (ALL ADMIN APIs)
+//                                // ========================
+//                                .requestMatchers(HttpMethod.GET, "/api/v1/itineraries/admin-templates").permitAll()
+//                                .requestMatchers(HttpMethod.GET, "/api/v1/itineraries/community").permitAll()
+//                                .requestMatchers(HttpMethod.GET, "/api/v1/itineraries/search").permitAll()
+//
+////                        .requestMatchers(HttpMethod.PATCH, "/api/v1/itineraries/**").hasRole("USER")
+//
+//                                .requestMatchers(
+//                                        "/api/v1/admin/itineraries/**",
+//                                        "/api/admin/**",
+//                                        "/api/analytics/**",
+//                                        "/api/moderation/**"
+//                                ).hasRole("ADMIN")
+//
+//                                .requestMatchers(HttpMethod.POST, "/api/destinations/**").hasRole("ADMIN")
+//                                .requestMatchers(HttpMethod.PUT, "/api/destinations/**").hasRole("ADMIN")
+//                                .requestMatchers(HttpMethod.DELETE, "/api/destinations/**").hasRole("ADMIN")
+//
+//                                .requestMatchers("/api/uploads/destination/**").hasRole("ADMIN")
+//
+//                                .requestMatchers(HttpMethod.PATCH, "/api/reviews/**/verify").hasRole("ADMIN")
+//                                .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
+//
+//                                // ========================
+//                                // 👤 USER
+//                                // ========================
+//                                .requestMatchers(
+//                                        "/api/v1/itineraries/*/like/**"
+//                                ).hasRole("USER")
+//                                .requestMatchers(
+//                                        "/api/v1/itineraries/**",
+//                                        "/api/likes/**",
+//                                        "/api/bookmarks/**",
+//                                        "/api/profile/**"
+//                                ).hasRole("USER")
+//
+//                                .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasRole("USER")
+//                                .requestMatchers(HttpMethod.PUT, "/api/reviews/**").hasRole("USER")
+//                                .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").hasRole("USER")
+//
+//                                .requestMatchers(HttpMethod.POST, "/api/community/posts/**").hasRole("USER")
+//                                .requestMatchers(HttpMethod.PUT, "/api/community/posts/**").hasRole("USER")
+//                                .requestMatchers(HttpMethod.DELETE, "/api/community/posts/**").hasRole("USER")
+//
+//                                .requestMatchers("/api/uploads/post/**").hasRole("USER")
+//                                .requestMatchers("/api/uploads/profile/**").hasRole("USER")
+//
+//                                // ========================
+//                                // 🔐 AUTHENTICATED (ANY USER)
+//                                // ========================
+//                                .requestMatchers(
+//                                        "/api/users/**",
+//                                        "/api/flags/**"
+//                                ).authenticated()
+//
+//                                .requestMatchers(HttpMethod.POST, "/api/uploads/**").authenticated()
+//                                .requestMatchers(HttpMethod.DELETE, "/api/uploads/**").authenticated()
+//
+//                                // ========================
+//                                // 🔒 FALLBACK
+//                                // ========================
+//                                .anyRequest().authenticated()
+//                )
+//
+//                .authenticationProvider(authenticationProvider())
+//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+//
+//        return http.build();
+
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .authorizeHttpRequests(auth -> auth
-
-                        // ========================
-                        // 🌍 CORS / PREFLIGHT
-                        // ========================
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // ========================
-                        // 🌐 PUBLIC
-                        // ========================
                         .requestMatchers(
                                 "/",
                                 "/error",
                                 "/uploads/**",
-                                "/api/auth/**",
+                                "/api/v1/auth/**",
                                 "/api/public/**",
                                 "/api/health",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api-docs/**"
+                                "/api-docs/**",
+                                "/api/community/posts/trending"
                         ).permitAll()
 
-                        // ========================
-                        // 📍 DESTINATIONS (PUBLIC READ)
-                        // ========================
-                        .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
+                        // AUTH
+                        .requestMatchers("/api/v1/auth/**").permitAll()
 
-                        // ========================
-                        // 🛡️ ADMIN (ALL ADMIN APIs)
-                        // ========================
-                        .requestMatchers(HttpMethod.GET,"/api/v1/itineraries/admin-templates").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/itineraries/{id}").permitAll()
+                        // PUBLIC - Anyone can view user profiles
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/destinations/**",
+                                "/api/v1/itineraries/admin-templates",
+                                "/api/v1/itineraries/{id}",
+                                "/api/community/posts/public",
+                                "/api/reviews/destination/{destinationId}",
+                                "/api/v1/debug/notifications/trigger-reminders",
+                                "/api/v1/subscriptions/payment-callback",
+                                "/api/v1/recommendations/**"
+                        ).permitAll()
 
+                        // USER - Profile and user operations
                         .requestMatchers(
-                                "/api/v1/admin/**",
-                                "/api/admin/**",
-                                "/api/analytics/**",
-                                "/api/moderation/**"
-                        ).hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.POST, "/api/destinations/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/destinations/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/destinations/**").hasRole("ADMIN")
-
-                        .requestMatchers("/api/uploads/destination/**").hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.PATCH, "/api/reviews/**/verify").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
-
-                        // ========================
-                        // 👤 USER
-                        // ========================
+                                "/api/v1/users/me/**",           // Profile endpoints
+                                "/api/v1/users/*/follow",          // Follow/unfollow
+                                "/api/v1/ml/**"
+                        ).hasRole("USER")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/{id}").authenticated()  // Self or admin
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/users/{id}/password").authenticated()  // Self only
+                        .requestMatchers(HttpMethod.GET, "/api/v1/itineraries/recommended").permitAll()
+                        // ITINERARIES & RECOMMENDATIONS
+                        .requestMatchers(HttpMethod.POST, "/api/v1/itineraries/{id}/reviews").hasRole("USER")
                         .requestMatchers(
-                                "/api/itineraries/**",
-                                "/api/likes/**",
-                                "/api/bookmarks/**",
-                                "/api/profile/**"
+                                "/api/v1/itineraries/**",
+                                "/api/v1/recommendations/**",
+                                "/api/v1/subscriptions/initiate-upgrade",
+                                "/api/v1/subscriptions/verify",
+                                "/api/posts/{postId}/comments/**"
                         ).hasRole("USER")
 
-                        .requestMatchers(HttpMethod.POST, "/api/reviews/**").hasRole("USER")
-                        .requestMatchers(HttpMethod.PUT, "/api/reviews/**").hasRole("USER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").hasRole("USER")
-
-                        .requestMatchers(HttpMethod.POST, "/api/community/posts/**").hasRole("USER")
-                        .requestMatchers(HttpMethod.PUT, "/api/community/posts/**").hasRole("USER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/community/posts/**").hasRole("USER")
-
-                        .requestMatchers("/api/uploads/post/**").hasRole("USER")
-                        .requestMatchers("/api/uploads/profile/**").hasRole("USER")
-
-                        // ========================
-                        // 🔐 AUTHENTICATED (ANY USER)
-                        // ========================
+                        // ADMIN - User management
                         .requestMatchers(
-                                "/api/users/**",
-                                "/api/flags/**"
-                        ).authenticated()
+                                "/api/admin/**",
+                                "/api/v1/users/stats/**"         // User stats
+                        ).hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users").hasRole("ADMIN")  // List all users
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/users/{id}/role").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/users/{id}/status").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/{id}").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/api/uploads/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/uploads/**").authenticated()
-
-                        // ========================
-                        // 🔒 FALLBACK
-                        // ========================
                         .anyRequest().authenticated()
                 )
-
                 .authenticationProvider(authenticationProvider())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

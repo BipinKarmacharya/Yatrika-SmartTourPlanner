@@ -63,8 +63,9 @@ public class Post extends BaseEntity {
     // Relationships
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 20)
+    @OrderBy("displayOrder ASC") // Add this so the gallery stays organized
     @Builder.Default
-    private Set<PostMedia> media = new HashSet<>();
+    private List<PostMedia> media = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 20)
@@ -72,10 +73,30 @@ public class Post extends BaseEntity {
     @OrderBy("dayNumber ASC")
     private List<PostDay> days = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("createdAt DESC") // Newest comments first
+    @Builder.Default
+    private List<Comment> comments = new ArrayList<>();
+
+    @Column(name = "total_comments")
+    @Builder.Default
+    private Integer totalComments = 0;
+
+
     // Helper methods
     public void addMedia(PostMedia mediaItem) {
-        media.add(mediaItem);
+        if (this.media == null) {
+            this.media = new ArrayList<>();
+        }
+        this.media.add(mediaItem);
         mediaItem.setPost(this);
+    }
+
+    public void removeMedia(PostMedia media) {
+        if (this.media != null) {
+            this.media.remove(media);
+            media.setPost(null); // Break the relationship
+        }
     }
 
     public void addDay(PostDay day) {
@@ -95,5 +116,21 @@ public class Post extends BaseEntity {
         if (this.totalLikes > 0) {
             this.totalLikes--;
         }
+    }
+
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
+        comment.setPost(this);
+        if (this.totalComments == null) {
+            this.totalComments = 1;
+        } else {
+            this.totalComments++;
+        }
+    }
+
+    public void removeComment(Comment comment) {
+        this.comments.remove(comment);
+        comment.setPost(null);
+        if (this.totalComments > 0) this.totalComments--;
     }
 }

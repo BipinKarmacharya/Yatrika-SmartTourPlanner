@@ -29,13 +29,17 @@ public class ItineraryItem extends BaseEntity {
 
     private Integer dayNumber;
     private Integer orderInDay;
-
     private String title;
+
     @Column(columnDefinition = "TEXT")
     private String notes;
+
     private BigDecimal estimatedCost;
     private LocalTime startTime;
     private LocalTime endTime;
-    private String activityType; // VISIT, MEAL, TRANSPORT
+
+    @Enumerated(EnumType.STRING)
+    private ActivityType activityType;// VISIT, MEAL, TRANSPORT
+
     private Boolean isVisited = false;
 }

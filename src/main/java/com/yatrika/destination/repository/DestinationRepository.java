@@ -10,10 +10,22 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public interface DestinationRepository extends JpaRepository<Destination, Long> {
 
     // Basic queries
+    // 🔹 For single lookup (used in getDestinationByName)
+    Optional<Destination> findByNameIgnoreCase(String name);
+
+    // 🔹 For ML bulk fetch (custom query)
+    @Query("""
+       SELECT d FROM Destination d
+       WHERE LOWER(d.name) IN :names
+       """)
+    List<Destination> findAllByNameInIgnoreCase(Set<String> names);
+
     List<Destination> findByDistrict(String district);
 
     List<Destination> findByProvince(String province);

@@ -1,53 +1,50 @@
 package com.yatrika.user.controller;
 
+import com.yatrika.user.dto.request.ForgotPasswordRequest;
 import com.yatrika.user.dto.request.LoginRequest;
 import com.yatrika.user.dto.request.RegisterRequest;
-import com.yatrika.user.dto.request.UpdateUserRequest;
+import com.yatrika.user.dto.request.ResetPasswordRequest;
+import com.yatrika.user.dto.response.ApiResponse;
 import com.yatrika.user.dto.response.AuthResponse;
-import com.yatrika.user.dto.response.UserResponse;
 import com.yatrika.user.service.AuthService;
-import com.yatrika.user.service.CurrentUserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth") // Added v1 to match other controllers
 @RequiredArgsConstructor
+@Tag(name = "Authentication", description = "Endpoints for user registration and login")
 public class AuthController {
 
     private final AuthService authService;
-    private final CurrentUserService currentUserService;
 
     @PostMapping("/register")
+    @Operation(summary = "Register a new user")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        AuthResponse response = authService.register(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(authService.register(request));
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Authenticate user and return JWT")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        AuthResponse response = authService.login(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(authService.login(request));
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<UserResponse> getCurrentUser() {
-        UserResponse response = currentUserService.getCurrentUser();
-        return ResponseEntity.ok(response);
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Send 6-digit OTP to email")
+    public ResponseEntity<ApiResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.initiatePasswordReset(request);
+        return ResponseEntity.ok(new ApiResponse(true, "If an account exists, an OTP has been sent to your email."));
     }
 
-    @PutMapping("/me")
-    public ResponseEntity<UserResponse> updateCurrentUser(
-            @Valid @RequestBody UpdateUserRequest request) {
-        UserResponse response = currentUserService.updateCurrentUser(request);
-        return ResponseEntity.ok(response);
-    }
-
-    @DeleteMapping("/me")
-    public ResponseEntity<Void> deleteCurrentUser() {
-        currentUserService.deleteCurrentUser();
-        return ResponseEntity.noContent().build();
+    @PostMapping("/reset-password")
+    @Operation(summary = "Reset password using the OTP")
+    public ResponseEntity<ApiResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(new ApiResponse(true, "Password has been successfully reset."));
     }
 }

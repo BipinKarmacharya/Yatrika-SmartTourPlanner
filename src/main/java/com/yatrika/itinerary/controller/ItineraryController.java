@@ -1,12 +1,18 @@
 package com.yatrika.itinerary.controller;
 
+import com.yatrika.itinerary.dto.request.CopyItineraryRequest;
 import com.yatrika.itinerary.dto.request.ItineraryFilterRequest;
 import com.yatrika.itinerary.dto.request.ItineraryItemRequest;
 import com.yatrika.itinerary.dto.request.ItineraryRequest;
 import com.yatrika.itinerary.dto.response.ItineraryResponse;
 import com.yatrika.itinerary.service.ItineraryService;
+import com.yatrika.recommendation.dto.ItineraryRecommendationResponse;
+import com.yatrika.recommendation.service.ItineraryRecommendationService;
 import com.yatrika.shared.security.UserPrincipal;
+import com.yatrika.user.domain.User;
+import com.yatrika.user.service.CurrentUserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,8 +22,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/itineraries")
@@ -25,7 +34,9 @@ import java.util.List;
 @Tag(name = "Itinerary Management", description = "APIs organized by Discovery, Lifecycle, and Personal Management")
 public class ItineraryController {
 
+    private final CurrentUserService currentUserService;
     private final ItineraryService itineraryService;
+    private final ItineraryRecommendationService itineraryRecommendationService;
 
     // Helper to get the ID from the JWT token
     private Long getCurrentUserId() {
@@ -35,7 +46,6 @@ public class ItineraryController {
     }
 
     // ================= STEP 1: DISCOVERY & EXPLORATION =================
-    // (Open to everyone or users exploring templates)
 
     @GetMapping("/admin-templates")
     @Operation(summary = "Get expert-curated admin itineraries (Tab 2)")
@@ -57,14 +67,39 @@ public class ItineraryController {
         return ResponseEntity.ok(itineraryService.searchPublicItineraries(filter, pageable));
     }
 
+    @GetMapping("/recommended")
+    @Operation(summary = "Get recommended itineraries (Personalized or General)",
+            security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<List<ItineraryRecommendationResponse>> getRecommended() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // 1. Check if the user is a Guest (Anonymous)
+        if (authentication == null ||
+                !authentication.isAuthenticated() ||
+                authentication.getPrincipal() instanceof String) {
+
+            // Return general/popular itineraries for guests so the app doesn't crash
+            return ResponseEntity.ok(itineraryRecommendationService.getGeneralRecommendations());
+        }
+
+        // 2. If we reached here, the user is logged in
+        User user = currentUserService.getCurrentUserEntity();
+        List<ItineraryRecommendationResponse> recommended =
+                itineraryRecommendationService.recommendForUser(user);
+
+        return ResponseEntity.ok(recommended);
+    }
+
     @GetMapping("/{id}")
-    @Operation(summary = "Get full details of any itinerary by ID")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Get full details of any itinerary by ID",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
     public ResponseEntity<ItineraryResponse> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(itineraryService.getItineraryById(id));
+        return ResponseEntity.ok(itineraryService.getItineraryById(id, getCurrentUserId()));
     }
 
     // ================= STEP 2: LIFECYCLE (CREATE & COPY) =================
-    // (Moving from discovery to ownership)
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
@@ -76,23 +111,33 @@ public class ItineraryController {
 
     @PostMapping("/{id}/copy")
     @PreAuthorize("hasRole('USER')")
-    @Operation(summary = "Copy an Admin template or Public trip to your own plans")
-    public ResponseEntity<ItineraryResponse> copy(@PathVariable Long id) {
+    @Operation(
+            summary = "Copy an Admin template or Public trip to your own plans",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<ItineraryResponse> copy(
+            @PathVariable Long id,
+            @RequestBody(required = false) CopyItineraryRequest copyRequest) {
+
+        LocalDate startDate = (copyRequest != null) ? copyRequest.getStartDate() : null;
+
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(itineraryService.copyItinerary(id, getCurrentUserId()));
+                .body(itineraryService.copyItinerary(id, getCurrentUserId(), startDate));
     }
 
     // ================= STEP 3: PERSONAL MANAGEMENT (MY TRIPS) =================
-    // (Managing your owned independent copies)
 
     @GetMapping("/my-plans")
     @PreAuthorize("hasRole('USER')")
-    @Operation(summary = "Get current user's personal itineraries")
+    @Operation(
+            summary = "Get current user's personal itineraries",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
     public ResponseEntity<Page<ItineraryResponse>> getMyPlans(Pageable pageable) {
         return ResponseEntity.ok(itineraryService.getMyItineraries(getCurrentUserId(), pageable));
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
     @Operation(summary = "Update itinerary header (Title, dates, etc)")
     public ResponseEntity<ItineraryResponse> updateHeader(
@@ -101,8 +146,23 @@ public class ItineraryController {
         return ResponseEntity.ok(itineraryService.updateItineraryHeader(id, request, getCurrentUserId()));
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Delete an entire personal itinerary", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<Void> deleteItinerary(@PathVariable Long id) {
+        itineraryService.deleteItinerary(id, getCurrentUserId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/my-plans/all")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Delete all personal itineraries for the current user", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<Void> deleteAllMyItineraries() {
+        itineraryService.deleteAllMyItineraries(getCurrentUserId());
+        return ResponseEntity.noContent().build();
+    }
+
     // ================= STEP 4: ITEM & PROGRESS MANAGEMENT =================
-    // (Day-by-day actions)
 
     @PostMapping("/{itineraryId}/items")
     @PreAuthorize("hasRole('USER')")
@@ -155,7 +215,6 @@ public class ItineraryController {
     }
 
     // ================= STEP 5: FINALIZING & SHARING =================
-    // (Closing the loop)
 
     @PatchMapping("/{id}/complete")
     @PreAuthorize("hasRole('USER')")
@@ -169,5 +228,71 @@ public class ItineraryController {
     @Operation(summary = "Make your completed original trip public")
     public ResponseEntity<ItineraryResponse> share(@PathVariable Long id) {
         return ResponseEntity.ok(itineraryService.shareTrip(id, getCurrentUserId()));
+    }
+
+    @PatchMapping("/{id}/unshare")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Make your public trip private again")
+    public ResponseEntity<ItineraryResponse> unshare(@PathVariable Long id) {
+        return ResponseEntity.ok(itineraryService.unshareTrip(id, getCurrentUserId()));
+    }
+
+    // ================= LIKE/SAVE FEATURES =================
+
+    // FIXED: Changed from separate like/unlike to toggle
+    @PostMapping("/{id}/like/toggle")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(
+            summary = "Toggle like on a public itinerary",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<ItineraryResponse> toggleLikeItinerary(@PathVariable Long id) {
+        return ResponseEntity.ok(itineraryService.toggleLikeItinerary(id, getCurrentUserId()));
+    }
+
+    @PostMapping("/{id}/save")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Save a public itinerary to my plans")
+    public ResponseEntity<ItineraryResponse> saveItinerary(@PathVariable Long id) {
+        return ResponseEntity.ok(itineraryService.saveItinerary(id, getCurrentUserId()));
+    }
+
+    @DeleteMapping("/{id}/save")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Unsave a public itinerary")
+    public ResponseEntity<ItineraryResponse> unsaveItinerary(@PathVariable Long id) {
+        return ResponseEntity.ok(itineraryService.unsaveItinerary(id, getCurrentUserId()));
+    }
+
+    @GetMapping("/saved/my-saved")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(
+            summary = "Get all saved itineraries for current user",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<List<ItineraryResponse>> getMySavedItineraries() {
+        return ResponseEntity.ok(itineraryService.getMySavedItineraries(getCurrentUserId()));
+    }
+
+    @GetMapping("/saved/check/{itineraryId}")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(
+            summary = "Check if an itinerary is saved by current user",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<Map<String, Boolean>> isItinerarySaved(@PathVariable Long itineraryId) {
+        boolean isSaved = itineraryService.isItinerarySaved(itineraryId, getCurrentUserId());
+        return ResponseEntity.ok(Map.of("isSaved", isSaved));
+    }
+
+    // ================= Itinerary Image upload by User =================
+    @PostMapping(value = "/{id}/images", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('USER')")
+    @Operation(summary = "Upload images for a personal itinerary (Flutter direct)")
+    public ResponseEntity<ItineraryResponse> uploadItineraryImages(
+            @PathVariable Long id,
+            @RequestParam("files") List<MultipartFile> files) {
+
+        return ResponseEntity.ok(itineraryService.uploadItineraryImages(id, files, getCurrentUserId()));
     }
 }

@@ -13,14 +13,16 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring") // Removed UserMapper.class to break dependency
+@Mapper(componentModel = "spring")
 public interface PostMapper {
 
     @Mapping(target = "user", source = "post.user")
+    @Mapping(target = "totalComments", source = "post.totalComments")
     @Mapping(target = "isLikedByCurrentUser", ignore = true)
     PostResponse toResponse(Post post);
 
-    // MapStruct will use this to convert the User entity to UserSummaryResponse
+    @Mapping(target = "isFollowing", ignore = true) // Handled in Service
+    @Mapping(target = "profileImageUrl", source = "profileImageUrl")
     UserSummaryResponse toUserSummaryResponse(User user);
 
     PostMediaResponse toMediaResponse(PostMedia media);

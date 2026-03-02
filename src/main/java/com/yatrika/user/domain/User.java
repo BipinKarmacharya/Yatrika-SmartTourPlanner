@@ -1,5 +1,6 @@
 package com.yatrika.user.domain;
 
+import com.yatrika.interest.domain.UserInterest;
 import com.yatrika.shared.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -62,16 +63,22 @@ public class User extends BaseEntity {
     @Column(name = "profile_image_url")
     private String profileImageUrl;
 
-    @ElementCollection
-    @CollectionTable(name = "user_interests", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "interest")
-    private List<String> interests = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserInterest> userInterests = new ArrayList<>();
 
     @Column(name = "deactivated_at")
     private LocalDateTime deactivatedAt;
 
     @Column(name = "deactivation_reason")
     private String deactivationReason;
+
+    @Column(name = "reset_token")
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    private LocalDateTime resetTokenExpiry;
+
+
     // Helper methods
     public String getFullName() {
         return (firstName != null ? firstName + " " : "") +

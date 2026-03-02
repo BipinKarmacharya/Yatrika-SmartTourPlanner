@@ -22,6 +22,7 @@ public class PostResponse {
     private Boolean isPublic;
     private Integer totalViews;
     private Integer totalLikes;
+    private Integer totalComments;
     private Boolean isLikedByCurrentUser;
     private List<PostMediaResponse> media;
     private List<PostDayResponse> days;

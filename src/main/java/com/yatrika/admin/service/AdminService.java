@@ -8,6 +8,7 @@ import com.yatrika.destination.repository.DestinationRepository;
 import com.yatrika.moderation.domain.ContentFlag;
 import com.yatrika.moderation.repository.ContentFlagRepository;
 import com.yatrika.review.repository.ReviewRepository;
+import com.yatrika.subscription.repository.TransactionRepository;
 import com.yatrika.user.domain.User;
 import com.yatrika.user.dto.response.UserResponse;
 import com.yatrika.user.repository.UserRepository;
@@ -35,6 +36,7 @@ public class AdminService {
     private final PostRepository postRepository;
     private final ReviewRepository reviewRepository;
     private final ContentFlagRepository contentFlagRepository;
+    private final TransactionRepository transactionRepository;
 
     public StatsDTO getSystemStatistics() {
         long totalUsers = userRepository.count();
@@ -45,6 +47,8 @@ public class AdminService {
         long postCount = postRepository.count();
         long reviewCount = reviewRepository.count();
         long pendingFlags = contentFlagRepository.countByStatus(ContentFlag.FlagStatus.PENDING);
+        Double revenue = transactionRepository.sumTotalRevenue();
+        double totalRevenue = (revenue != null) ? revenue : 0.0;
 
         return StatsDTO.builder()
                 .totalUsers(totalUsers)
@@ -54,6 +58,7 @@ public class AdminService {
                 .postCount(postCount)
                 .reviewCount(reviewCount)
                 .pendingFlags(pendingFlags)
+                .totalRevenue(totalRevenue)
                 .build();
     }
 
