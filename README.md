@@ -52,7 +52,7 @@ Khalti Merchant Account (for payment integration)
 Clone the repository:
 
 #### Bash
-git clone https://github.com/bipinkarmacharya/yatrika.git
+git clone https://github.com/BipinKarmacharya/Yatrika-SmartTourPlanner.git
 cd yatrika
 #### Configure Environment Variables:
 Create an application.yml or application.properties file in src/main/resources with your credentials:
