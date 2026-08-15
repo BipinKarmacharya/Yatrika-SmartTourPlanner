@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 
@@ -19,6 +20,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Value("${app.upload.dir:uploads}") // Added a default value just in case
     private String uploadDir;
+
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addRedirectViewController("/", "/swagger-ui.html");
+    }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
