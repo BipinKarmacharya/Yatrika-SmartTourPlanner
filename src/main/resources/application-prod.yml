@@ -3,8 +3,6 @@ spring:
     activate:
       on-profile: prod
   datasource:
-    # Use environment variables for security!
-    # Do NOT hardcode the Render URL/Password here.
     url: ${DATABASE_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
@@ -13,7 +11,7 @@ spring:
       ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:validate}
       show-sql: false
   flyway:
-    enabled: false # Keep false if you haven't set up migration scripts yet
+    enabled: false
 
 app:
   jwt:
@@ -25,12 +23,12 @@ app:
   upload:
     dir: /tmp/uploads
 
-logging:
-  level:
-    root: INFO
-    com.yatrika: INFO
-
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}
   api-key: ${CLOUDINARY_API_KEY}
   api-secret: ${CLOUDINARY_API_SECRET}
+
+logging:
+  level:
+    root: INFO
+    com.yatrika: INFO

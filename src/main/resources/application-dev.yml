@@ -3,9 +3,9 @@ spring:
     activate:
       on-profile: dev
   datasource:
-    url: jdbc:postgresql://localhost:5432/yatrika
-    username: postgres
-    password: PostgreSQL@2000
+    url: ${DEV_DB_URL}
+    username: ${DEV_DB_USERNAME}
+    password: ${DEV_DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,7 +16,7 @@ spring:
 
 app:
   jwt:
-    secret: yatrika-dev-secret-key-very-long-and-secure-for-local
+    secret: ${DEV_JWT_SECRET}
     expiration: 86400000
   cors:
     allowed-origins: "*"
@@ -24,13 +24,12 @@ app:
   upload:
     dir: ./uploads/dev
 
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}
+
 logging:
   level:
     com.yatrika: DEBUG
     org.hibernate.SQL: DEBUG
-
-# Add to application-dev.yml
-cloudinary:
-  cloud-name: ${CLOUDINARY_CLOUD_NAME:dh23gnotg}
-  api-key: ${CLOUDINARY_API_KEY}
-  api-secret: ${CLOUDINARY_API_SECRET}
