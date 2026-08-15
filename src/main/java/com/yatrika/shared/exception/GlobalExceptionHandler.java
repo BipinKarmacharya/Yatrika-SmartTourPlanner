@@ -6,6 +6,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -69,6 +70,16 @@ public class GlobalExceptionHandler {
                 "status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "error", "Internal Server Error",
                 "message", "Something went wrong"
+        ));
+    }
+
+    // Catch missing routes/resources cleanly with 404 instead of 500
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNoResourceFound(NoResourceFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                "status", 404,
+                "error", "Not Found",
+                "message", "The requested resource or endpoint was not found: " + ex.getResourcePath()
         ));
     }
 }
