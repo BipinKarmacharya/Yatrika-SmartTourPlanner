@@ -2,7 +2,7 @@ spring:
   application:
     name: yatrika-backend
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev} # Default to dev for local work
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   servlet:
     multipart:
       max-file-size: 10MB
@@ -24,14 +24,11 @@ spring:
         order_inserts: true
         order_updates: true
         default_batch_fetch_size: 20
-
   mail:
     host: smtp.gmail.com
     port: 587
-#    username: ${MAIL_USERNAME}
-#    password: ${MAIL_PASSWORD}
-    username: nepstudy02@gmail.com
-    password: mmwq vwuh wmzv heut
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -47,17 +44,15 @@ server:
 
 yatrika:
   weather:
-    api-key: ${WEATHER_API_KEY:d895ab23e750ef568431483e907bc4d7}
+    api-key: ${WEATHER_API_KEY}
     base-url: https://api.openweathermap.org/data/2.5
   firebase:
     config-path: ${FIREBASE_CONFIG_PATH:classpath:firebase-service-account.json}
 
 khalti:
   api:
-    secret-key: 58d43b1d80424901bfd906046e7ff7f2
+    secret-key: ${KHALTI_SECRET_KEY}
 
-
-# You can also add specific logging for your new services here
 logging:
   level:
     com.yatrika.notification: DEBUG
